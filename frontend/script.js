@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const actionButtons = document.querySelectorAll(".action-button");
   const actionsTitle = document.getElementById("actionsTitle");
 
+  const API_URL = "https://<tu-dominio-en-render>.onrender.com/api/stock"; // Reemplaza con tu URL de backend en Render
+
   let selectedAction = "add"; // Acción seleccionada por defecto
 
   /**
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   async function updateStockView() {
       try {
-          const response = await fetch("http://localhost:3000/api/stock");
+          const response = await fetch(API_URL);
           if (!response.ok) throw new Error("Error al obtener el stock.");
           const stock = await response.json();
 
@@ -72,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-          const response = await fetch("http://localhost:3000/api/stock", {
+          const response = await fetch(API_URL, {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
