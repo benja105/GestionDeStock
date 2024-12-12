@@ -1,122 +1,163 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const stockView = document.getElementById("stockView");
-  const actionInput = document.getElementById("actionInput");
-  const actionButton = document.getElementById("actionButton");
-  const actionButtons = document.querySelectorAll(".action-button");
-  const actionsTitle = document.getElementById("actionsTitle");
+const mongoose = require("mongoose");
+const express = require("express");
+const cors = require("cors");
 
-  const API_URL = "https://gestiondestock-88xs.onrender.com"; // Reemplaza con tu URL de backend en Render
+const app = express();
+const port = 3000;
 
-  let selectedAction = "add"; // Acción seleccionada por defecto
-
-  /**
-   * Actualiza el título de acciones con la opción seleccionada.
-   */
-  function updateActionsTitle(action) {
-      const actionTexts = {
-          add: "Agregar al stock",
-          request: "Solicitar del stock",
-          return: "Devolver al stock",
-      };
-
-      const actionText = actionTexts[action] || "Acción desconocida";
-      actionsTitle.innerHTML = `Acciones <span>(${actionText})</span>`;
-  }
-
-  /**
-   * Función para actualizar la vista del stock desde el backend.
-   */
-  async function updateStockView() {
-      try {
-          const response = await fetch(API_URL);
-          if (!response.ok) throw new Error("Error al obtener el stock.");
-          const stock = await response.json();
-
-          const ul = document.createElement("ul");
-          ul.innerHTML = "";
-
-          if (stock.length === 0) {
-              const li = document.createElement("li");
-              li.textContent = "No hay productos en el stock.";
-              ul.appendChild(li);
-          } else {
-              stock.forEach(({ product, quantity }) => {
-                  const li = document.createElement("li");
-                  li.textContent = `${product}: ${quantity} unidades`;
-                  ul.appendChild(li);
-              });
-          }
-          stockView.innerHTML = ""; // Limpiar el contenedor
-          stockView.appendChild(ul);
-      } catch (error) {
-          console.error(error);
-          alert("Error al actualizar la vista del stock.");
-      }
-  }
-
-  /**
-   * Función para manejar acciones (Agregar, Solicitar, Devolver) enviadas al backend.
-   */
-  async function handleAction() {
-      const input = actionInput.value.trim();
-
-      if (!input) {
-          alert("Por favor, ingresa un producto y cantidad. Ejemplo: 'producto, cantidad'");
-          return;
-      }
-
-      const [product, rawQuantity] = input.split(",").map((item) => item.trim());
-      const quantity = parseInt(rawQuantity, 10);
-
-      if (!product || isNaN(quantity) || quantity <= 0) {
-          alert("Formato incorrecto. Usa el formato: 'producto, cantidad'");
-          return;
-      }
-
-      try {
-          const response = await fetch(API_URL, {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                  action: selectedAction,
-                  product,
-                  quantity,
-              }),
-          });
-
-          const result = await response.json();
-
-          if (!response.ok) throw new Error(result.message || "Error al realizar la acción.");
-
-          alert(`Acción completada: ${result.product} ahora tiene ${result.quantity} unidades.`);
-          actionInput.value = ""; // Limpiar input
-          updateStockView(); // Actualizar la vista del stock
-      } catch (error) {
-          console.error(error);
-          alert(error.message || "Error al realizar la acción.");
-      }
-  }
-
-  /**
-   * Evento para cambiar la acción seleccionada al hacer clic en un botón.
-   */
-  actionButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-          // Remover estilos previos
-          actionButtons.forEach((btn) => btn.classList.remove("selected"));
-          // Marcar el botón actual como seleccionado
-          button.classList.add("selected");
-          selectedAction = button.dataset.action; // Guardar la acción
-          updateActionsTitle(selectedAction); // Actualizar el título
-      });
-  });
-
-  // Asignar evento al botón de realizar acción
-  actionButton.addEventListener("click", handleAction);
-
-  // Actualizar la vista inicial
-  updateStockView();
-  updateActionsTitle(selectedAction); // Título inicial
+// ** Conexión a MongoDB **
+mongoose.connect("process.env.MONGO_URI", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 });
+
+// ** Eventos de conexión **
+mongoose.connection.on("error", (err) => {
+    console.error("Error al conectar a MongoDB:", err);
+});
+
+mongoose.connection.once("open", () => {
+    console.log("Conectado a MongoDB");
+});
+
+// ** Definición del esquema y modelo **
+const stockSchema = new mongoose.Schema({
+    product: { type: String, required: true },
+    quantity: { type: Number, required: true },
+});
+
+const Stock = mongoose.model("Stock", stockSchema);
+
+// ** Middleware **
+app.use(cors()); // Permitir solicitudes de otros orígenes
+app.use(express.json()); // Habilitar procesamiento de JSON
+
+// ** Ruta de verificación del servidor **
+app.get("/", (req, res) => {
+    res.send("Bienvenido al servidor");
+});
+
+// ** Rutas de API **
+
+// Obtener todo el stock
+app.get("/api/stock", async (req, res) => {
+    try {
+        const stock = await Stock.find();
+        res.json(stock);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener el stock" });
+    }
+});
+
+// Agregar, solicitar o devolver stock
+app.post("/api/stock", async (req, res) => {
+    const { action, product, quantity } = req.body;
+
+    if (!action || !product || typeof quantity !== "number") {
+        return res.status(400).json({ message: "Datos incompletos o inválidos" });
+    }
+
+    try {
+        let stockItem = await Stock.findOne({ product });
+
+        if (!stockItem) {
+            stockItem = new Stock({ product, quantity: 0 });
+        }
+
+        switch (action) {
+            case "add":
+                stockItem.quantity += quantity;
+                break;
+            case "request":
+                if (stockItem.quantity >= quantity) {
+                    stockItem.quantity -= quantity;
+                } else {
+                    return res.status(400).json({ message: "Stock insuficiente" });
+                }
+                break;
+            case "return":
+                stockItem.quantity += quantity;
+                break;
+            default:
+                return res.status(400).json({ message: "Acción no válida" });
+        }
+
+        await stockItem.save();
+        res.json(stockItem);
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el stock" });
+    }
+});
+
+// Crear un producto
+app.post("/api/products", async (req, res) => {
+    const { product, quantity } = req.body;
+
+    if (!product || typeof quantity !== "number") {
+        return res.status(400).json({ message: "Datos incompletos o inválidos" });
+    }
+
+    try {
+        const newProduct = new Stock({ product, quantity });
+        await newProduct.save();
+        res.status(201).json({ message: "Producto creado", data: newProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error al crear el producto" });
+    }
+});
+
+// Actualizar un producto
+app.put("/api/products/:id", async (req, res) => {
+    const { id } = req.params;
+    const { product, quantity } = req.body;
+
+    if (!product || typeof quantity !== "number") {
+        return res.status(400).json({ message: "Datos incompletos o inválidos" });
+    }
+
+    try {
+        const updatedProduct = await Stock.findByIdAndUpdate(
+            id,
+            { product, quantity },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+
+        res.json({ message: "Producto actualizado", data: updatedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el producto" });
+    }
+});
+
+// Eliminar un producto
+app.delete("/api/products/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedProduct = await Stock.findByIdAndDelete(id);
+
+        if (!deletedProduct) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+
+        res.json({ message: "Producto eliminado", data: deletedProduct });
+    } catch (error) {
+        res.status(500).json({ message: "Error al eliminar el producto" });
+    }
+});
+
+// ** Middleware de manejo global de errores **
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Error interno del servidor", error: err.message });
+});
+
+// ** Iniciar servidor **
+app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+
+//Realizar accion: curl -X POST http://localhost:3000/api/stock -H "Content-Type: application/json" -d "{\"action\": \"add o request o return\", \"product\": \"Producto1\", \"quantity\": 10}"
