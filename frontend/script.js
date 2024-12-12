@@ -5,8 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const actionButtons = document.querySelectorAll(".action-button");
   const actionsTitle = document.getElementById("actionsTitle");
 
-  const API_URL = "https://gestiondestock-88xs.onrender.com"; // Reemplaza con tu URL de backend en Render
-
   let selectedAction = "add"; // Acción seleccionada por defecto
 
   /**
@@ -28,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   async function updateStockView() {
       try {
-          const response = await fetch(API_URL);
+          const response = await fetch("http://localhost:3000/api/stock");
           if (!response.ok) throw new Error("Error al obtener el stock.");
           const stock = await response.json();
 
@@ -74,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-          const response = await fetch(API_URL, {
+          const response = await fetch("http://localhost:3000/api/stock", {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
