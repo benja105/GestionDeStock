@@ -5,6 +5,17 @@ const cors = require("cors");
 const app = express();
 const port = 3000;
 
+// ** Frontend ** 
+const path = require("path");
+
+// Ruta para servir archivos estáticos desde la carpeta "frontend"
+app.use(express.static(path.join(__dirname, "..", "frontend")));
+
+// Ruta para servir el archivo principal "index.html"
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
+});
+
 // ** Conexión a MongoDB **
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
