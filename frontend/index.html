@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Stock en Tiempo Real</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>Gestión de Stock en Tiempo Real</header>
+  
+  <main>
+    <!-- Contenedor para acciones -->
+    <div id="actions">
+  <h2 id="actionsTitle">Acciones</h2>
+  
+  <!-- Botones de acción -->
+  <div id="actionButtons">
+    <button class="action-button" data-action="add">Agregar al stock</button>
+    <button class="action-button" data-action="request">Solicitar del stock</button>
+    <button class="action-button" data-action="return">Devolver al stock</button>
+  </div>
+
+  <label for="actionInput">Producto y cantidad:</label>
+  <input id="actionInput" type="text" placeholder="Ejemplo: Producto, Cantidad" />
+  
+  <button id="actionButton">Realizar acción</button>
+</div>
+
+    <!-- Contenedor para la vista del stock -->
+    <div id="stockView">
+      <h2>Estado del Stock</h2>
+      <ul>
+        <!-- Aquí se actualizarán los productos y cantidades -->
+      </ul>
+    </div>
+  </main>
+  
+  <footer>
+    &copy; 2024 Gestión de Stock en Tiempo Real. Todos los derechos reservados.
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

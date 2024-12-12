@@ -1,0 +1,169 @@
+/* Estilos Generales */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212; /* Fondo oscuro */
+    color: #e0e0e0; /* Texto claro */
+  }
+  
+  header {
+    background-color: #1f1b24; /* Fondo del encabezado */
+    color: #ffffff; /* Texto blanco suave */
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); /* Sombra más intensa */
+    font-size: 1.5rem;
+  }
+  
+  main {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    margin: auto;
+  }
+  
+  button {
+    margin: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    background-color: #3e3b47; /* Fondo oscuro para botones */
+    color: #ffffff; /* Texto blanco */
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); /* Sombra oscura */
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  button:hover {
+    background-color: #5a5568; /* Cambio a un tono más claro */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.6);
+  }
+  
+  button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.4);
+  }
+  
+  #actions, #stockView {
+    background-color: #1f1b24; /* Fondo oscuro para las cajas */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    padding: 1.5rem;
+    margin: 1rem;
+    width: 90%;
+    max-width: 500px;
+  }
+  
+  input {
+    margin-right: 0.5rem;
+    padding: 0.7rem;
+    border: 1px solid #333;
+    background-color: #2a292e; /* Fondo oscuro */
+    color: #e0e0e0; /* Texto claro */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    width: calc(100% - 1rem);
+  }
+  
+  input::placeholder {
+    color: #a0a0a0; /* Texto de marcador más claro */
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+  
+  li {
+    background-color: #2a292e; /* Fondo oscuro para cada producto */
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    color: #e0e0e0; /* Texto claro */
+  }
+  
+  footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #a0a0a0; /* Texto más tenue */
+  }
+  
+  /* Media Queries para Pantallas Pequeñas */
+  @media (max-width: 600px) {
+    header {
+      font-size: 1.2rem;
+      padding: 0.8rem;
+    }
+  
+    button {
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+    }
+  
+    #actions, #stockView {
+      padding: 1rem;
+    }
+  
+    input {
+      padding: 0.6rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+    }
+  }
+  
+  /* Media Queries para Pantallas Grandes */
+  @media (min-width: 1200px) {
+    main {
+      flex-direction: row;
+      justify-content: space-around;
+    }
+  
+    #actions, #stockView {
+      width: 45%;
+    }
+  }
+  
+  #actionButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  
+  .action-button {
+    flex: 1; /* Botones del mismo tamaño */
+    margin: 0.5rem;
+    padding: 0.7rem 1.2rem;
+    background-color: #3e3b47;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .action-button:hover {
+    background-color: #5a5568;
+    transform: translateY(-2px);
+  }
+  
+  .action-button:active {
+    transform: translateY(0);
+  }
+  
+  #actionsTitle span {
+    color: #ffb400; /* Color distintivo */
+    font-weight: bold;
+    font-style: italic;
+    margin-left: 0.5rem;
+  }
