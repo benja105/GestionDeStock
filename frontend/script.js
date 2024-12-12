@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const actionButtons = document.querySelectorAll(".action-button");
   const actionsTitle = document.getElementById("actionsTitle");
 
-  const API_URL = "https://<tu-dominio-en-render>.onrender.com/api/stock"; // Reemplaza con tu URL de backend en Render
+  const API_URL = "https://gestiondestock-88xs.onrender.com"; // Reemplaza con tu URL de backend en Render
 
   let selectedAction = "add"; // Acción seleccionada por defecto
 
