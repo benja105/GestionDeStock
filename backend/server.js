@@ -87,6 +87,9 @@ app.post("/api/stock", async (req, res) => {
                 }
                 break;
             case "return":
+                if (!stockItem || stockItem.quantity === 0) {
+                    return res.status(400).json({ message: "No se puede devolver un producto que no existe en el stock." });
+                }
                 stockItem.quantity += quantity;
                 break;
             default:
