@@ -80,8 +80,12 @@ app.post("/api/stock", async (req, res) => {
                 stockItem.quantity += quantity;
                 break;
             case "request":
-                if (stockItem.quantity >= quantity) {
+                if (!stockItem || stockItem.quantity === 0){
+                    return res.status(400).json({ message: "No se puede solicitar un producto que no existe en el stock." });
+                }
+                else if (stockItem.quantity >= quantity) {
                     stockItem.quantity -= quantity;
+                
                 } else {
                     return res.status(400).json({ message: "Stock insuficiente" });
                 }
