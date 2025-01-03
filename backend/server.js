@@ -274,7 +274,7 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
 //ultimo
 // Modelo de Rendición
 const renditionSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Asociar rendiciones al usuario
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     productType: String,
     clientId: String,
     clientDetails: String,
@@ -284,6 +284,7 @@ const renditionSchema = new mongoose.Schema({
     returnBoxes: Number,
     saleAmount: Number,
     paymentAmount: Number,
+    paymentMethod: { type: String, enum: ["Efectivo", "Transferencia"], required: true }, // Nuevo campo
     balance: Number,
 });
 
@@ -304,14 +305,15 @@ app.post("/api/renditions", authorize(), async (req, res) => {
     const { 
         productType, clientId, clientDetails, 
         initialBoxes, rechargeBoxes, soldBoxes, 
-        returnBoxes, saleAmount, paymentAmount 
+        returnBoxes, saleAmount, paymentAmount, 
+        paymentMethod
     } = req.body;
 
     const balance = saleAmount - paymentAmount;
 
     try {
         const newRendition = new Rendition({
-            userId: req.user.id, // Asociar la rendición al usuario autenticado
+            userId: req.user.id,
             productType,
             clientId,
             clientDetails,
@@ -321,6 +323,7 @@ app.post("/api/renditions", authorize(), async (req, res) => {
             returnBoxes,
             saleAmount,
             paymentAmount,
+            paymentMethod,
             balance,
         });
         await newRendition.save();
@@ -412,6 +415,15 @@ app.post("/api/renditions/pay-contrafactura/:id", authorize(), async (req, res) 
     }
 });
 
+// Ruta para eliminar todas las rendiciones asociadas al usuario autenticado (DELETE)
+app.delete("/api/renditions", authorize(), async (req, res) => {
+    try {
+        await Rendition.deleteMany({ userId: req.user.id }); // Eliminar rendiciones del usuario
+        res.status(200).json({ message: "Todas las rendiciones han sido eliminadas" });
+    } catch (err) {
+        res.status(500).json({ message: "Error al eliminar las rendiciones" });
+    }
+});
 
 //hasta aca
 
