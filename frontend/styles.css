@@ -1,4 +1,9 @@
 /* Estilos Generales */
+
+* {
+    box-sizing: border-box; /* Asegura que el padding y borde se incluyan en el ancho total */
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
@@ -231,7 +236,7 @@ section h2 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     margin-bottom: 1.5rem;
-    font-size: 0.9rem; /* Tamaño de texto reducido */
+    font-size: 0.69rem; /* Tamaño de texto reducido */
 }
 
 .compact-table th, .compact-table td {
