@@ -644,10 +644,6 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
     }
 });
 
-document.getElementById("reloadPage").addEventListener("click", () => {
-    location.reload(); // Recargar la página
-});
-
 const resetTablesButton = document.getElementById("resetTablesButton");
 
 resetTablesButton.addEventListener("click", async () => {
