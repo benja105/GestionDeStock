@@ -8,7 +8,7 @@
 </head>
 <body>
   <header>
-    <h2>Gestión de Stock y Ventas</h1>
+    <h2>Gestión de Stock y Ventas</h2>
     <!-- Botón para cerrar sesión y actualizar -->
     <div>
       <button id="logoutButton">Cerrar Sesión</button>
@@ -30,7 +30,6 @@
         <button id="authButton">Entrar</button>
         <p id="authError" class="error"></p>
       </form>
-
     </div>
 
     <!-- Contenedor de registro -->
@@ -55,37 +54,41 @@
       <p>¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a></p>
     </div>
 
-    <!-- Contenedor de acciones (solo visible tras iniciar sesión) -->
+    <!-- Acciones, Estado del Stock y Registrar Venta -->
     <div id="dashboard" style="display: none;">
-      <!-- Sección de acciones -->
-      <div id="actions">
-        <h2 id="actionsTitle">Acciones</h2>
-        <div id="actionButtons">
-          <button class="action-button" data-action="add">Agregar al stock</button>
-          <button class="action-button" data-action="request">Solicitar del stock</button>
-          <button class="action-button" data-action="return">Devolver al stock</button>
-        </div>
+      <section>
+        <section id="actions">
+          <h2 id="actionsTitle">Acciones</h2>
+          <!-- Sección de acciones -->
+          <div id="actionButtons">
+            <button class="action-button" data-action="add">Agregar al stock</button>
+            <button class="action-button" data-action="request">Solicitar del stock</button>
+            <button class="action-button" data-action="return">Devolver al stock</button>
+          </div>
 
-        <label for="actionInput">Producto y cantidad:</label>
-        <input id="actionInput" type="text" placeholder="Ejemplo: Producto, Cantidad" />
-        <button id="actionButton">Realizar acción</button>
-      </div>
+          <label for="actionInput">Producto y cantidad:</label>
+          <input id="actionInput" type="text" placeholder="Ejemplo: Producto, Cantidad" />
+          <button id="actionButton">Realizar acción</button>
+        </section>
+      </section>
 
-      <!-- Vista de stock -->
-      <div id="stockView">
-        <h2>Estado del Stock</h2>
-        <ul id="stockList"></ul>
-      </div>
+        <!-- Vista de stock -->
+        <section>
+          <section id="stockView">
+            <h2>Estado del Stock</h2>
+            <ul id="stockList"></ul>
+          </section>
+        </section>
 
-      <!-- Sección de ventas -->
-      <div id="sales">
-        <h2>Registrar Venta</h2>
-        <label for="saleInput">Producto y cantidad vendidos:</label>
-        <input id="saleInput" type="text" placeholder="Ejemplo: Producto, Cantidad" />
-        <button id="saleButton">Registrar Venta</button>
-      </div>
+        <!-- Sección de ventas -->
+        <section id="sales">
+          <h2>Registrar Venta</h2>
+          <label for="saleInput">Producto y cantidad vendidos:</label>
+          <input id="saleInput" type="text" placeholder="Ejemplo: Producto, Cantidad" />
+          <button id="saleButton">Registrar Venta</button>
+        </section>
 
-      <!-- Reportes -->
+      <!-- Reportes (en el caso de ingresar como admin) -->
       <div id="reports" style="display: none;">
         <h2>Reportes</h2>
         <button class="report-button" data-type="weekly">Reporte Semanal</button>
@@ -94,108 +97,112 @@
         <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
       </div>
 
-      <h1>Gestión de Rendición de Dinero</h1>
-    
-    <!-- Formulario para registrar rendiciones -->
-    <section>
-      <h2>Registrar Rendición</h2>
-      <form id="renditionForm">
-        <label for="productType">Tipo de Producto:</label>
-        <select id="productType" name="productType" required>
-            <option value="Producto A">Producto A</option>
-            <option value="Producto B">Producto B</option>
-            <option value="Producto C">Producto C</option>
-        </select>
-    
-        <label for="clientId">ID Cliente:</label>
-        <input type="text" id="clientId" name="clientId" required>
-    
-        <label for="clientDetails">Detalles del Cliente:</label>
-        <input type="text" id="clientDetails" name="clientDetails" required>
-    
-        <label for="initialBoxes">Pedido Inicial (Cajas):</label>
-        <input type="number" id="initialBoxes" name="initialBoxes" required>
-    
-        <label for="rechargeBoxes">Recarga (Cajas):</label>
-        <input type="number" id="rechargeBoxes" name="rechargeBoxes" value="0">
-    
-        <label for="soldBoxes">Cantidad Vendida (Cajas):</label>
-        <input type="number" id="soldBoxes" name="soldBoxes" required>
-    
-        <label for="returnBoxes">Cantidad a Devolver (Cajas):</label>
-        <input type="number" id="returnBoxes" name="returnBoxes" readonly>
-    
-        <label for="saleAmount">Importe de Venta:</label>
-        <input type="number" id="saleAmount" name="saleAmount" required>
-    
-        <label for="paymentAmount">Importe de Cobranza:</label>
-        <input type="number" id="paymentAmount" name="paymentAmount" required>
-    
-        <label for="paymentMethod">Método de Pago:</label>
-        <select id="paymentMethod" name="paymentMethod" required>
-            <option value="Efectivo">Efectivo</option>
-            <option value="Transferencia">Transferencia</option>
-        </select>
-    
-        <button type="submit">Registrar Rendición</button>
-    </form>    
-  </section>
-  <section>
-    <h2>Pagar Contrafactura</h2>
-    <form id="paymentForm">
-        <label for="pendingContrafacturas">Seleccionar Contrafactura:</label>
-        <select id="pendingContrafacturas" name="contrafacturaId" required>
-            <!-- Aquí se llenarán las opciones dinámicamente -->
-        </select>
+      <!-- Gestión de Rendición de Dinero -->
+        <h2>Gestión de Rendición de Dinero</h2>
 
-        <label for="paymentAmount">Monto a Pagar:</label>
-        <input type="number" id="paymentAmountInput" name="paymentAmount" required min="1" step="0.01">
+        <!-- Formulario para registrar rendiciones -->
+        <section>
+          <h2>Registrar Rendición</h2>
+          <form id="renditionForm">
+            <label for="productType">Tipo de Producto:</label>
+            <select id="productType" name="productType" required>
+                <option value="Producto A">Producto A</option>
+                <option value="Producto B">Producto B</option>
+                <option value="Producto C">Producto C</option>
+            </select>
 
-        <button type="submit">Registrar Pago</button>
-    </form>
-  </section>
+            <label for="clientId">ID Cliente:</label>
+            <input type="text" id="clientId" name="clientId" required>
 
+            <label for="clientDetails">Detalles del Cliente:</label>
+            <input type="text" id="clientDetails" name="clientDetails" required>
 
-  <!-- Tabla para mostrar las rendiciones -->
-  <section>
-      <h2>Rendiciones Registradas</h2>
-      <table>
-          <thead>
-              <tr>
-                  <th>Tipo de Producto</th>
-                  <th>ID Cliente</th>
-                  <th>Detalles del Cliente</th>
-                  <th>Pedido Inicial</th>
-                  <th>Recarga</th>
-                  <th>Vendidas</th>
-                  <th>A Devolver</th>
-                  <th>Metodo de pago</th>
-                  <th>Importe Venta</th>
-                  <th>Importe Cobranza</th>
-                  <th>Saldo</th>
-              </tr>
-          </thead>
-          <tbody id="renditionsTable">
-              <!-- Aquí se llenarán las filas dinámicamente -->
-          </tbody>
-      </table>
-      <section>
-        <h2>Ventas Totales por Producto</h2>
-        <table>
+            <label for="initialBoxes">Pedido Inicial (Cajas):</label>
+            <input type="number" id="initialBoxes" name="initialBoxes" required>
+
+            <label for="rechargeBoxes">Recarga (Cajas):</label>
+            <input type="number" id="rechargeBoxes" name="rechargeBoxes" value="0">
+
+            <label for="soldBoxes">Cantidad Vendida (Cajas):</label>
+            <input type="number" id="soldBoxes" name="soldBoxes" required>
+
+            <label for="returnBoxes">Cantidad a Devolver (Cajas):</label>
+            <input type="number" id="returnBoxes" name="returnBoxes" readonly>
+
+            <label for="saleAmount">Importe de Venta:</label>
+            <input type="number" id="saleAmount" name="saleAmount" required>
+
+            <label for="paymentAmount">Importe de Cobranza:</label>
+            <input type="number" id="paymentAmount" name="paymentAmount" required>
+
+            <label for="paymentMethod">Método de Pago:</label>
+            <select id="paymentMethod" name="paymentMethod" required>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+            </select>
+
+            <button type="submit">Registrar Rendición</button>
+          </form>
+        </section>
+
+        <!-- Formulario para pagar contrafactura -->
+        <section>
+          <h2>Pagar Contrafactura</h2>
+          <form id="paymentForm">
+            <label for="pendingContrafacturas">Seleccionar Contrafactura:</label>
+            <select id="pendingContrafacturas" name="contrafacturaId" required>
+                <!-- Aquí se llenarán las opciones dinámicamente -->
+            </select>
+
+            <label for="paymentAmount">Monto a Pagar:</label>
+            <input type="number" id="paymentAmountInput" name="paymentAmount" required min="1" step="0.01">
+
+            <button type="submit">Registrar Pago</button>
+          </form>
+        </section>
+
+        <!-- Tabla para mostrar las rendiciones -->
+        <section>
+          <h2>Rendiciones Registradas</h2>
+          <table>
             <thead>
-                <tr>
-                    <th>Tipo de Producto</th>
-                    <th>Total Ventas</th>
-                </tr>
+              <tr>
+                <th>Tipo de Producto</th>
+                <th>ID Cliente</th>
+                <th>Detalles del Cliente</th>
+                <th>Pedido Inicial</th>
+                <th>Recarga</th>
+                <th>Vendidas</th>
+                <th>A Devolver</th>
+                <th>Metodo de pago</th>
+                <th>Importe Venta</th>
+                <th>Importe Cobranza</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+            <tbody id="renditionsTable">
+                <!-- Aquí se llenarán las filas dinámicamente -->
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Ventas Totales por Producto -->
+        <section>
+          <h2>Ventas Totales por Producto</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo de Producto</th>
+                <th>Total Ventas</th>
+              </tr>
             </thead>
             <tbody id="salesSummaryTable">
                 <!-- Aquí se llenarán las filas dinámicamente -->
             </tbody>
-        </table>
-        <!-- Botón para reiniciar las tablas -->
-        <button id="resetTablesButton" style="margin-top: 10px;">Reiniciar Tablas</button>
-    </section>
-    </section>
+          </table>
+          <!-- Botón para reiniciar las tablas -->
+          <button id="resetTablesButton" style="margin-top: 10px;">Reiniciar Tablas</button>
+        </section>
     </div>
   </main>
 
