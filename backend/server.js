@@ -425,6 +425,7 @@ app.delete("/api/renditions", authorize(), async (req, res) => {
     }
 });
 
+
 //hasta aca
 
 // Inicialización del servidor
@@ -439,6 +440,3 @@ app.listen(port, async () => {
         console.log("Usuario admin creado con credenciales por defecto.");
     }
 });
-
-
-
