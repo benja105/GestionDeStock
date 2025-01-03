@@ -100,39 +100,45 @@
     <section>
       <h2>Registrar Rendición</h2>
       <form id="renditionForm">
-          <label for="productType">Tipo de Producto:</label>
-          <select id="productType" name="productType" required>
-              <option value="Producto A">Producto A</option>
-              <option value="Producto B">Producto B</option>
-              <option value="Producto C">Producto C</option>
-          </select>
-
-          <label for="clientId">ID Cliente:</label>
-          <input type="text" id="clientId" name="clientId" required>
-
-          <label for="clientDetails">Detalles del Cliente:</label>
-          <input type="text" id="clientDetails" name="clientDetails" required>
-
-          <label for="initialBoxes">Pedido Inicial (Cajas):</label>
-          <input type="number" id="initialBoxes" name="initialBoxes" required>
-
-          <label for="rechargeBoxes">Recarga (Cajas):</label>
-          <input type="number" id="rechargeBoxes" name="rechargeBoxes" value="0">
-
-          <label for="soldBoxes">Cantidad Vendida (Cajas):</label>
-          <input type="number" id="soldBoxes" name="soldBoxes" required>
-
-          <label for="returnBoxes">Cantidad a Devolver (Cajas):</label>
-          <input type="number" id="returnBoxes" name="returnBoxes" readonly>
-
-          <label for="saleAmount">Importe de Venta:</label>
-          <input type="number" id="saleAmount" name="saleAmount" required>
-
-          <label for="paymentAmount">Importe de Cobranza:</label>
-          <input type="number" id="paymentAmount" name="paymentAmount" required>
-
-          <button type="submit">Registrar Rendición</button>
-      </form>
+        <label for="productType">Tipo de Producto:</label>
+        <select id="productType" name="productType" required>
+            <option value="Producto A">Producto A</option>
+            <option value="Producto B">Producto B</option>
+            <option value="Producto C">Producto C</option>
+        </select>
+    
+        <label for="clientId">ID Cliente:</label>
+        <input type="text" id="clientId" name="clientId" required>
+    
+        <label for="clientDetails">Detalles del Cliente:</label>
+        <input type="text" id="clientDetails" name="clientDetails" required>
+    
+        <label for="initialBoxes">Pedido Inicial (Cajas):</label>
+        <input type="number" id="initialBoxes" name="initialBoxes" required>
+    
+        <label for="rechargeBoxes">Recarga (Cajas):</label>
+        <input type="number" id="rechargeBoxes" name="rechargeBoxes" value="0">
+    
+        <label for="soldBoxes">Cantidad Vendida (Cajas):</label>
+        <input type="number" id="soldBoxes" name="soldBoxes" required>
+    
+        <label for="returnBoxes">Cantidad a Devolver (Cajas):</label>
+        <input type="number" id="returnBoxes" name="returnBoxes" readonly>
+    
+        <label for="saleAmount">Importe de Venta:</label>
+        <input type="number" id="saleAmount" name="saleAmount" required>
+    
+        <label for="paymentAmount">Importe de Cobranza:</label>
+        <input type="number" id="paymentAmount" name="paymentAmount" required>
+    
+        <label for="paymentMethod">Método de Pago:</label>
+        <select id="paymentMethod" name="paymentMethod" required>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+        </select>
+    
+        <button type="submit">Registrar Rendición</button>
+    </form>    
   </section>
   <section>
     <h2>Pagar Contrafactura</h2>
@@ -163,6 +169,7 @@
                   <th>Recarga</th>
                   <th>Vendidas</th>
                   <th>A Devolver</th>
+                  <th>Metodo de pago</th>
                   <th>Importe Venta</th>
                   <th>Importe Cobranza</th>
                   <th>Saldo</th>
@@ -185,10 +192,11 @@
                 <!-- Aquí se llenarán las filas dinámicamente -->
             </tbody>
         </table>
+        <!-- Botón para reiniciar las tablas -->
+        <button id="resetTablesButton" style="margin-top: 10px;">Reiniciar Tablas</button>
     </section>
     </section>
     </div>
-    
   </main>
 
   <footer>
