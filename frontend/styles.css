@@ -214,6 +214,69 @@ table tr:hover {
     background-color: #e0e0e0;
 }
 
+/* Estilo para la sección de rendiciones */
+section h2 {
+    text-align: center;
+    color: #333333;
+    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+.compact-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem; /* Tamaño de texto reducido */
+}
+
+.compact-table th, .compact-table td {
+    padding: 0.6rem; /* Tamaño de padding reducido */
+    text-align: center;
+    border-bottom: 1px solid #cccccc;
+}
+
+.compact-table th {
+    background-color: #004080;
+    color: #ffffff;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.compact-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.compact-table tr:hover {
+    background-color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+    .compact-table th, .compact-table td {
+        padding: 0.4rem;
+        font-size: 0.8rem; /* Texto aún más compacto para pantallas pequeñas */
+    }
+
+    section h2 {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .compact-table th, .compact-table td {
+        font-size: 0.7rem;
+        padding: 0.3rem;
+    }
+
+    section h2 {
+        font-size: 1.2rem;
+    }
+}
+
 #actionsTitle span {
     color: #004080;
     font-weight: bold;
