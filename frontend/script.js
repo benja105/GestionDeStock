@@ -627,3 +627,29 @@ document.getElementById("reloadPage").addEventListener("click", () => {
     location.reload(); // Recargar la página
 });
 
+const resetTablesButton = document.getElementById("resetTablesButton");
+
+resetTablesButton.addEventListener("click", async () => {
+    try {
+        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        if (response.ok) {
+            // Limpiar las tablas en el frontend
+            renditionsTable.innerHTML = "";
+            salesSummaryTable.innerHTML = "";
+
+            alert("Las tablas y los datos asociados han sido reiniciados.");
+        } else {
+            const errorResponse = await response.json();
+            alert("Error al reiniciar las tablas: " + (errorResponse.message || "Error desconocido"));
+        }
+    } catch (error) {
+        console.error("Error al reiniciar las tablas:", error);
+        alert(error.message);
+    }
+});
