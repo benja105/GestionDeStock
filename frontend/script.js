@@ -394,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${rendition.rechargeBoxes}</td>
                     <td>${rendition.soldBoxes}</td>
                     <td>${rendition.returnBoxes}</td>
+                    <td>${rendition.paymentMethod}</td>
                     <td>${rendition.saleAmount.toFixed(2)}</td>
                     <td class="${isPaymentExceedsSale ? 'error' : ''}">${rendition.paymentAmount.toFixed(2)}</td>
                     <td>${rendition.balance.toFixed(2)}</td>
@@ -460,6 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 returnBoxes: parseInt(document.getElementById("returnBoxes").value, 10),
                 saleAmount: parseFloat(document.getElementById("saleAmount").value),
                 paymentAmount: parseFloat(document.getElementById("paymentAmount").value),
+                paymentMethod: document.getElementById("paymentMethod").value, // Nuevo campo
             };
 
             // Validar que el importe de cobranza no sea mayor al importe de venta antes de enviar
