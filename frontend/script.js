@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token"); // Recuperar el token de autenticación
             if (!token) throw new Error("No estás autenticado. Inicia sesión nuevamente.");
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/register", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const password = document.getElementById("password").value;
 
         try {
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/login", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token"); // Obtener token del localStorage
             if (!token) throw new Error("No estás autenticado. Inicia sesión nuevamente.");
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/stock", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/stock", {
                 headers: { "Authorization": `Bearer ${token}` },
             });
 
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token"); // Obtener token del localStorage
             if (!token) throw new Error("No estás autenticado. Inicia sesión nuevamente.");
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/stock", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/stock", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token"); // Recuperar el token
             if (!token) throw new Error("No estás autenticado. Inicia sesión nuevamente.");
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/sales", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/sales", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Marca como descargando
             isDownloading = true;
 
-            const response = await fetch(`https://gestiondestock-jv3a.onrender/api/reports/${type}`, {
+            const response = await fetch(`https://gestiondestock-jv3a.onrender.com/api/reports/${type}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/renditions", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${token}` },
             });
@@ -439,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Verificar si el cliente tiene una contrafactura pendiente
-            const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender/api/renditions/check-contrafactura/${clientId}`, {
+            const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/check-contrafactura/${clientId}`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
             });
@@ -468,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const response = await fetch("https://gestiondestock-jv3a.onrender/api/renditions", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -505,7 +505,7 @@ const fetchPendingContrafacturas = async () => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
 
-        const response = await fetch("https://gestiondestock-jv3a.onrender/api/renditions/pending-contrafacturas", {
+        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions/pending-contrafacturas", {
             method: "GET",
             headers: { "Authorization": `Bearer ${token}` },
         });
@@ -567,7 +567,7 @@ paymentForm.addEventListener("submit", async (event) => {
         const token = localStorage.getItem("token");
         if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
 
-        const response = await fetch(`https://gestiondestock-jv3a.onrender/api/renditions/pay-contrafactura/${contrafacturaId}`, {
+        const response = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/pay-contrafactura/${contrafacturaId}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -599,7 +599,7 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
         const token = localStorage.getItem("token");
 
         // Enviar la solicitud de cierre de sesión al servidor
-        const response = await fetch("https://gestiondestock-jv3a.onrender/api/logout", {
+        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/logout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,
