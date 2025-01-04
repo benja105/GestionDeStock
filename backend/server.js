@@ -496,11 +496,23 @@ app.get("/api/renditions/check-client/:clientId", authorize(), async (req, res) 
     const { clientId } = req.params;
 
     try {
-        // Buscar rendiciones previas del cliente
+        // Verificar si el cliente tiene contrafacturas pendientes
+        const pendingRenditions = await Rendition.find({
+            clientId,
+            balance: { $gt: 0 }, // Buscar rendiciones con saldo pendiente
+        });
+
+        if (pendingRenditions.length > 0) {
+            return res.status(400).json({ 
+                message: "El cliente tiene una contrafactura pendiente. Debe pagarla antes de registrar una nueva rendición." 
+            });
+        }
+
+        // Buscar una rendición previa del cliente
         const existingRendition = await Rendition.findOne({ clientId });
 
         if (existingRendition) {
-            // Si existe una rendición previa, devolvemos los detalles del cliente registrados
+            // Si existe una rendición previa, devolver los detalles registrados del cliente
             return res.status(200).json({
                 clientDetails: existingRendition.clientDetails,
                 message: "Cliente encontrado. Los detalles deben coincidir con los registrados."
@@ -513,9 +525,11 @@ app.get("/api/renditions/check-client/:clientId", authorize(), async (req, res) 
             message: "Cliente no registrado previamente. Puede proceder con nuevos detalles."
         });
     } catch (err) {
+        console.error("Error al verificar los detalles del cliente:", err);
         res.status(500).json({ message: "Error al verificar los detalles del cliente" });
     }
 });
+
 
 //hasta aca
 
