@@ -446,6 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Error al obtener las rendiciones:", error);
             alert(error.message);
         }
+        fetchRenditions();
     };
     
     // Manejar el envío del formulario
