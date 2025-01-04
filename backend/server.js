@@ -200,7 +200,7 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
         try {
             // Obtener las ventas y poblar el campo 'userId' para obtener la información del usuario
             const sales = await Sale.find().populate("userId", "username"); // 'username' es el campo que queremos del modelo User
-            
+    
             doc.text("Reporte de Ventas", { align: "center", underline: true });
             doc.moveDown();
     
@@ -208,29 +208,98 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             if (sales.length === 0) {
                 doc.text("No hay ventas registradas.");
             } else {
+                // Inicializar un objeto para acumular las ventas por usuario
+                const userSalesSummary = {};
+    
                 // Iterar sobre las ventas
                 sales.forEach(({ product, quantity, date, userId }) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
                     const formattedDate = new Date(date).toLocaleString(); // Asegurarnos de que la fecha esté bien formateada
-                    doc.text(`${product}: ${quantity} unidades vendidas el ${formattedDate} por ${userName}`);
+                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
+    
+                    // Acumular las ventas por usuario
+                    if (!userSalesSummary[userName]) {
+                        userSalesSummary[userName] = { totalSold: 0, products: {} };
+                    }
+    
+                    userSalesSummary[userName].totalSold += quantity;
+                    if (!userSalesSummary[userName].products[product]) {
+                        userSalesSummary[userName].products[product] = 0;
+                    }
+                    userSalesSummary[userName].products[product] += quantity;
+                });
+    
+                doc.moveDown();
+                doc.text("Resumen por usuario:", { underline: true });
+                doc.moveDown();
+    
+                // Agregar el resumen de ventas por usuario al final
+                Object.entries(userSalesSummary).forEach(([userName, { totalSold, products }]) => {
+                    const productSummary = Object.entries(products)
+                        .map(([product, quantity]) => `${quantity} ${product}`)
+                        .join(", ");
+                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary})`);
                 });
             }
         } catch (err) {
             console.error("Error al generar el reporte de ventas:", err);
             doc.text("Error al generar el reporte de ventas.");
         }
-    };
+    };    
 
     const generateWeeklyReport = async (doc) => {
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-        const weeklySales = await Sale.find({ date: { $gte: oneWeekAgo } });
-        doc.text("Reporte Semanal", { align: "center", underline: true });
-        doc.moveDown();
-        weeklySales.forEach(({ product, quantity, date }) => {
-            doc.text(`${product}: ${quantity} unidades vendidas el ${date.toLocaleString()}`);
-        });
+        try {
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+            // Obtener las ventas de la última semana y poblar el campo 'userId' para obtener la información del usuario
+            const weeklySales = await Sale.find({ date: { $gte: oneWeekAgo } }).populate("userId", "username");
+    
+            // Inicializar un objeto para acumular las ventas por usuario
+            const userSalesSummary = {};
+    
+            doc.text("Reporte Semanal", { align: "center", underline: true });
+            doc.moveDown();
+    
+            // Verificar si hay ventas
+            if (weeklySales.length === 0) {
+                doc.text("No hay ventas registradas en la última semana.");
+            } else {
+                weeklySales.forEach(({ product, quantity, date, userId }) => {
+                    const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
+                    const formattedDate = new Date(date).toLocaleString(); // Asegurarnos de que la fecha esté bien formateada
+    
+                    // Imprimir la venta individual
+                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
+    
+                    // Acumular las ventas por usuario
+                    if (!userSalesSummary[userName]) {
+                        userSalesSummary[userName] = { totalSold: 0, products: {} };
+                    }
+    
+                    userSalesSummary[userName].totalSold += quantity;
+                    if (!userSalesSummary[userName].products[product]) {
+                        userSalesSummary[userName].products[product] = 0;
+                    }
+                    userSalesSummary[userName].products[product] += quantity;
+                });
+    
+                doc.moveDown();
+                doc.text("Resumen por usuario:", { underline: true });
+                doc.moveDown();
+    
+                // Agregar el resumen de ventas por usuario al final
+                Object.entries(userSalesSummary).forEach(([userName, { totalSold, products }]) => {
+                    const productSummary = Object.entries(products)
+                        .map(([product, quantity]) => `${quantity} ${product}`)
+                        .join(", ");
+                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary})`);
+                });
+            }
+        } catch (err) {
+            console.error("Error al generar el reporte semanal:", err);
+            doc.text("Error al generar el reporte semanal.");
+        }
     };
 
     try {
