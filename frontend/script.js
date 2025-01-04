@@ -555,7 +555,7 @@ const fetchPendingContrafacturas = async () => {
             contrafacturas.forEach((contrafactura) => {
                 const option = document.createElement("option");
                 option.value = contrafactura._id;
-                option.textContent = `Cliente: ${contrafactura.clientId}, Saldo Pendiente: $${contrafactura.balance.toFixed(2)}`;
+                option.textContent = `Cliente: ${contrafactura.clientId}, ${contrafactura.productType}, Saldo P: $${contrafactura.balance.toFixed(2)}`;
                 option.setAttribute("data-balance", contrafactura.balance); // Agregar saldo pendiente
                 pendingContrafacturas.appendChild(option);
             });
