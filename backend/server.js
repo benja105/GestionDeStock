@@ -491,6 +491,31 @@ app.delete("/api/renditions", authorize(), async (req, res) => {
     }
 });
 
+// Ruta que verifica si un cliente ya está registrado y valida sus detalles
+app.get("/api/renditions/check-client/:clientId", authorize(), async (req, res) => {
+    const { clientId } = req.params;
+
+    try {
+        // Buscar rendiciones previas del cliente
+        const existingRendition = await Rendition.findOne({ clientId });
+
+        if (existingRendition) {
+            // Si existe una rendición previa, devolvemos los detalles del cliente registrados
+            return res.status(200).json({
+                clientDetails: existingRendition.clientDetails,
+                message: "Cliente encontrado. Los detalles deben coincidir con los registrados."
+            });
+        }
+
+        // Si no hay rendiciones previas para el cliente
+        res.status(200).json({
+            clientDetails: null,
+            message: "Cliente no registrado previamente. Puede proceder con nuevos detalles."
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Error al verificar los detalles del cliente" });
+    }
+});
 
 //hasta aca
 
