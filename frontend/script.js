@@ -361,117 +361,125 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("rechargeBoxes").addEventListener("input", calculateReturnBoxes);
 
     // Función para cargar las rendiciones desde el servidor
-const fetchRenditions = async () => {
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
-
-        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
-            method: "GET",
-            headers: { "Authorization": `Bearer ${token}` },
-        });
-
-        if (!response.ok) throw new Error("No se pudo obtener las rendiciones.");
-
-        const renditions = await response.json();
-
-        renditionsTable.innerHTML = "";
-        salesSummaryTable.innerHTML = "";
-
-        const salesSummary = {}; // Ventas totales por tipo de producto
-        const salesRemaining = {}; // Saldos pendientes por tipo de producto
-
-        // Inicializa las ventas y los saldos pendientes
-        renditions.forEach((rendition) => {
-            if (!salesSummary[rendition.productType]) {
-                salesSummary[rendition.productType] = 0;
-                salesRemaining[rendition.productType] = 0;
-            }
-            salesSummary[rendition.productType] += rendition.saleAmount;
-            salesRemaining[rendition.productType] += rendition.saleAmount;
-        });
-
-        // Actualiza la tabla de rendiciones
-        renditions.forEach((rendition) => {
-            const row = document.createElement("tr");
-
-            // Validar si el importe de cobranza es mayor al importe de venta
-            const isPaymentExceedsSale = rendition.paymentAmount > rendition.saleAmount;
-
-            row.innerHTML = `
-                <td>${rendition.productType}</td>
-                <td>${rendition.clientId}</td>
-                <td>${rendition.clientDetails}</td>
-                <td>${rendition.initialBoxes}</td>
-                <td>${rendition.rechargeBoxes}</td>
-                <td>${rendition.soldBoxes}</td>
-                <td>${rendition.returnBoxes}</td>
-                <td>${rendition.paymentMethod}</td>
-                <td>${rendition.saleAmount.toFixed(2)}</td>
-                <td class="${isPaymentExceedsSale ? 'error' : ''}">${rendition.paymentAmount.toFixed(2)}</td>
-                <td>${rendition.balance.toFixed(2)}</td>
-            `;
-
-            // Agregar advertencia visual si el importe de cobranza excede el importe de venta
-            if (isPaymentExceedsSale) {
-                const warningCell = document.createElement("td");
-                warningCell.textContent = "¡Cobranza > Venta!";
-                warningCell.classList.add("warning");
-                row.appendChild(warningCell);
-            }
-
-            renditionsTable.appendChild(row);
-
-            // Restar el importe de cobranza del saldo pendiente
-            if (salesRemaining[rendition.productType] !== undefined) {
-                salesRemaining[rendition.productType] -= rendition.paymentAmount;
-                if (salesRemaining[rendition.productType] < 0) {
-                    salesRemaining[rendition.productType] = 0; // Evita saldos negativos
+    const fetchRenditions = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
+    
+            const response = await fetch("http://localhost:3000/api/renditions", {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` },
+            });
+    
+            if (!response.ok) throw new Error("No se pudo obtener las rendiciones.");
+    
+            const renditions = await response.json();
+    
+            renditionsTable.innerHTML = "";
+            salesSummaryTable.innerHTML = "";
+    
+            const salesSummary = {}; // Ventas totales por tipo de producto
+            const salesRemaining = {}; // Saldos pendientes por tipo de producto
+    
+            // Inicializa las ventas y los saldos pendientes
+            renditions.forEach((rendition) => {
+                if (!salesSummary[rendition.productType]) {
+                    salesSummary[rendition.productType] = 0;
+                    salesRemaining[rendition.productType] = 0;
                 }
+                salesSummary[rendition.productType] += rendition.saleAmount;
+                salesRemaining[rendition.productType] += rendition.saleAmount;
+            });
+    
+            // Actualiza la tabla de rendiciones
+            renditions.forEach((rendition) => {
+                const row = document.createElement("tr");
+    
+                // Validar si el importe de cobranza es mayor al importe de venta
+                const isPaymentExceedsSale = rendition.paymentAmount > rendition.saleAmount;
+    
+                row.innerHTML = `
+                    <td>${rendition.productType}</td>
+                    <td>${rendition.clientId}</td>
+                    <td>${rendition.clientDetails}</td>
+                    <td>${rendition.initialBoxes}</td>
+                    <td>${rendition.rechargeBoxes}</td>
+                    <td>${rendition.soldBoxes}</td>
+                    <td>${rendition.returnBoxes}</td>
+                    <td>${rendition.paymentMethod}</td>
+                    <td>${rendition.saleAmount.toFixed(2)}</td>
+                    <td class="${isPaymentExceedsSale ? 'error' : ''}">${rendition.paymentAmount.toFixed(2)}</td>
+                    <td>${rendition.balance.toFixed(2)}</td>
+                `;
+    
+                // Agregar advertencia visual si el importe de cobranza excede el importe de venta
+                if (isPaymentExceedsSale) {
+                    const warningCell = document.createElement("td");
+                    warningCell.textContent = "¡Cobranza > Venta!";
+                    warningCell.classList.add("warning");
+                    row.appendChild(warningCell);
+                }
+    
+                renditionsTable.appendChild(row);
+    
+                // Restar el importe de cobranza del saldo pendiente
+                if (salesRemaining[rendition.productType] !== undefined) {
+                    salesRemaining[rendition.productType] -= rendition.paymentAmount;
+                    if (salesRemaining[rendition.productType] < 0) {
+                        salesRemaining[rendition.productType] = 0; // Evita saldos negativos
+                    }
+                }
+            });
+    
+            // Mostrar el resumen de ventas por producto actualizado dinámicamente
+            for (const [productType, totalSales] of Object.entries(salesSummary)) {
+                const summaryRow = document.createElement("tr");
+                const totalCobrado = totalSales - salesRemaining[productType]; // Total cobrado
+    
+                summaryRow.innerHTML = `
+                    <td>${productType}</td>
+                    <td>${totalCobrado.toFixed(2)}</td> <!-- Muestra lo cobrado hasta el momento -->
+                `;
+                salesSummaryTable.appendChild(summaryRow);
             }
-        });
-
-        // Mostrar el resumen de ventas por producto actualizado dinámicamente
-        for (const [productType, totalSales] of Object.entries(salesSummary)) {
-            const summaryRow = document.createElement("tr");
-            const totalCobrado = totalSales - salesRemaining[productType]; // Total cobrado
-
-            summaryRow.innerHTML = `
-                <td>${productType}</td>
-                <td>${totalCobrado.toFixed(2)}</td> <!-- Muestra lo cobrado hasta el momento -->
-            `;
-            salesSummaryTable.appendChild(summaryRow);
-            fetchRenditions();
+        } catch (error) {
+            console.error("Error al obtener las rendiciones:", error);
+            alert(error.message);
         }
-    } catch (error) {
-        console.error("Error al obtener las rendiciones:", error);
-        alert(error.message);
-    }
-};
-
+    };
+    
     // Manejar el envío del formulario
     renditionForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-
+    
         const clientId = document.getElementById("clientId").value;
-
+        const clientDetails = document.getElementById("clientDetails").value;
+    
         try {
-            // Verificar si el cliente tiene una contrafactura pendiente
-            const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/check-contrafactura/${clientId}`, {
+            // Verificar si el cliente ya existe
+            const checkResponse = await fetch(`http://localhost:3000/api/renditions/check-client/${clientId}`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
             });
-
+    
             if (!checkResponse.ok) {
                 const errorResponse = await checkResponse.json();
-                alert(errorResponse.message || "Error al verificar la contrafactura");
+                alert(errorResponse.message || "Error al verificar el cliente");
                 return;
             }
-
+    
+            const clientData = await checkResponse.json();
+    
+            // Validar que los detalles del cliente coincidan si ya está registrado
+            if (clientData && clientData.clientDetails && clientData.clientDetails !== clientDetails) {
+                alert("Los detalles del cliente no coinciden con los registrados.");
+                return;
+            }
+    
             const formData = {
                 productType: document.getElementById("productType").value,
                 clientId,
-                clientDetails: document.getElementById("clientDetails").value,
+                clientDetails,
                 initialBoxes: parseInt(document.getElementById("initialBoxes").value, 10),
                 rechargeBoxes: parseInt(document.getElementById("rechargeBoxes").value, 10),
                 soldBoxes: parseInt(document.getElementById("soldBoxes").value, 10),
@@ -480,14 +488,14 @@ const fetchRenditions = async () => {
                 paymentAmount: parseFloat(document.getElementById("paymentAmount").value),
                 paymentMethod: document.getElementById("paymentMethod").value, // Nuevo campo
             };
-
+    
             // Validar que el importe de cobranza no sea mayor al importe de venta antes de enviar
             if (formData.paymentAmount > formData.saleAmount) {
                 alert("El importe de cobranza no puede ser mayor al importe de venta.");
                 return;
             }
-
-            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+    
+            const response = await fetch("http://localhost:3000/api/renditions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -495,7 +503,7 @@ const fetchRenditions = async () => {
                 },
                 body: JSON.stringify(formData),
             });
-
+    
             if (response.ok) {
                 renditionForm.reset();
                 calculateReturnBoxes();
