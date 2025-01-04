@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No estás autenticado. Por favor, inicia sesión.");
     
-            const response = await fetch("http://localhost:3000/api/renditions", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${token}` },
             });
@@ -457,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
         try {
             // Verificar si el cliente ya existe
-            const checkResponse = await fetch(`http://localhost:3000/api/renditions/check-client/${clientId}`, {
+            const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/check-client/${clientId}`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
             });
@@ -495,7 +495,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
     
-            const response = await fetch("http://localhost:3000/api/renditions", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
