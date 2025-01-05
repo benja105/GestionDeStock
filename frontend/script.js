@@ -413,31 +413,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // Manejar el envío del formulario
     renditionForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-    
+
         const clientId = document.getElementById("clientId").value;
         const clientDetails = document.getElementById("clientDetails").value;
-    
+
         try {
             // Verificar si el cliente ya existe
             const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/check-client/${clientId}`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
             });
-    
+
             if (!checkResponse.ok) {
                 const errorResponse = await checkResponse.json();
                 alert(errorResponse.message || "Error al verificar el cliente");
                 return;
             }
-    
+
             const clientData = await checkResponse.json();
-    
+
             // Validar que los detalles del cliente coincidan si ya está registrado
             if (clientData && clientData.clientDetails && clientData.clientDetails !== clientDetails) {
                 alert("Los detalles del cliente no coinciden con los registrados.");
                 return;
             }
-    
+
             const formData = {
                 productType: document.getElementById("productType").value,
                 clientId,
@@ -450,15 +450,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 paymentAmount: parseFloat(document.getElementById("paymentAmount").value),
                 paymentMethod: document.getElementById("paymentMethod").value, // Nuevo campo
             };
-    
+
             // Validar que el importe de cobranza no sea mayor al importe de venta antes de enviar
             if (formData.paymentAmount > formData.saleAmount) {
                 alert("El importe de cobranza no puede ser mayor al importe de venta.");
                 return;
             }
-    
+
             // Registrar rendición y venta en el backend
-            const response = await fetch("http://localhost:3000/api/renditions", {
+            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -466,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 },
                 body: JSON.stringify(formData),
             });
-    
+
             if (response.ok) {
                 renditionForm.reset();
                 calculateReturnBoxes();
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(error.message);
         }
     });
-    
+
     // Cargar las rendiciones al cargar la página
     fetchRenditions();
 
@@ -649,3 +649,5 @@ resetTablesButton.addEventListener("click", async () => {
         alert(error.message);
     }
 });
+
+// Modifica este codigo para que: al "registrar una rendicion", la misma se debe registrar como una venta y guardarse de la misma forma que se hace ahora en los reportes, de esta forma eliminar directamente la seccion para registrar ventas.
