@@ -395,6 +395,7 @@ app.post("/api/renditions", authorize(), async (req, res) => {
 });
 
 // Botón de Cerrar Sesión
+
 app.post("/api/logout", authorize(), (req, res) => {
     try {
         // En este caso no necesitamos invalidar el token porque este expirará automáticamente
