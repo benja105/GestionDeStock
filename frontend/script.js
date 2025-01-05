@@ -375,76 +375,88 @@ document.addEventListener("DOMContentLoaded", () => {
     
             const renditions = await response.json();
     
-            renditionsTable.innerHTML = "";
-            salesSummaryTable.innerHTML = "";
-    
-            const salesSummary = {}; // Ventas totales por tipo de producto
-            const salesRemaining = {}; // Saldos pendientes por tipo de producto
-    
-            // Inicializa las ventas y los saldos pendientes
-            renditions.forEach((rendition) => {
-                if (!salesSummary[rendition.productType]) {
-                    salesSummary[rendition.productType] = 0;
-                    salesRemaining[rendition.productType] = 0;
-                }
-                salesSummary[rendition.productType] += rendition.saleAmount;
-                salesRemaining[rendition.productType] += rendition.saleAmount;
-            });
-    
-            // Actualiza la tabla de rendiciones
-            renditions.forEach((rendition) => {
-                const row = document.createElement("tr");
-    
-                // Validar si el importe de cobranza es mayor al importe de venta
-                const isPaymentExceedsSale = rendition.paymentAmount > rendition.saleAmount;
-    
-                row.innerHTML = `
-                    <td>${rendition.productType}</td>
-                    <td>${rendition.clientId}</td>
-                    <td>${rendition.clientDetails}</td>
-                    <td>${rendition.initialBoxes}</td>
-                    <td>${rendition.rechargeBoxes}</td>
-                    <td>${rendition.soldBoxes}</td>
-                    <td>${rendition.returnBoxes}</td>
-                    <td>${rendition.paymentMethod}</td>
-                    <td>${rendition.saleAmount.toFixed(2)}</td>
-                    <td class="${isPaymentExceedsSale ? 'error' : ''}">${rendition.paymentAmount.toFixed(2)}</td>
-                    <td>${rendition.balance.toFixed(2)}</td>
-                `;
-    
-                // Agregar advertencia visual si el importe de cobranza excede el importe de venta
-                if (isPaymentExceedsSale) {
-                    const warningCell = document.createElement("td");
-                    warningCell.textContent = "¡Cobranza > Venta!";
-                    warningCell.classList.add("warning");
-                    row.appendChild(warningCell);
-                }
-    
-                renditionsTable.appendChild(row);
-    
-                // Restar el importe de cobranza del saldo pendiente
-                if (salesRemaining[rendition.productType] !== undefined) {
-                    salesRemaining[rendition.productType] -= rendition.paymentAmount;
-                    if (salesRemaining[rendition.productType] < 0) {
-                        salesRemaining[rendition.productType] = 0; // Evita saldos negativos
-                    }
-                }
-            });
-    
-            // Mostrar el resumen de ventas por producto actualizado dinámicamente
-            for (const [productType, totalSales] of Object.entries(salesSummary)) {
-                const summaryRow = document.createElement("tr");
-                const totalCobrado = totalSales - salesRemaining[productType]; // Total cobrado
-    
-                summaryRow.innerHTML = `
-                    <td>${productType}</td>
-                    <td>${totalCobrado.toFixed(2)}</td> <!-- Muestra lo cobrado hasta el momento -->
-                `;
-                salesSummaryTable.appendChild(summaryRow);
-            }
+            // Actualizar tablas dinámicamente
+            updateRenditionsTable(renditions);
+            updateSalesSummaryTable(renditions);
         } catch (error) {
             console.error("Error al obtener las rendiciones:", error);
             alert(error.message);
+        }
+    };
+    
+    // Función para actualizar la tabla de rendiciones
+    const updateRenditionsTable = (renditions) => {
+        renditionsTable.innerHTML = ""; // Limpia la tabla
+    
+        renditions.forEach((rendition) => {
+            const row = document.createElement("tr");
+    
+            // Validar si el importe de cobranza es mayor al importe de venta
+            const isPaymentExceedsSale = rendition.paymentAmount > rendition.saleAmount;
+    
+            row.innerHTML = `
+                <td>${rendition.productType}</td>
+                <td>${rendition.clientId}</td>
+                <td>${rendition.clientDetails}</td>
+                <td>${rendition.initialBoxes}</td>
+                <td>${rendition.rechargeBoxes}</td>
+                <td>${rendition.soldBoxes}</td>
+                <td>${rendition.returnBoxes}</td>
+                <td>${rendition.paymentMethod}</td>
+                <td>${rendition.saleAmount.toFixed(2)}</td>
+                <td class="${isPaymentExceedsSale ? 'error' : ''}">${rendition.paymentAmount.toFixed(2)}</td>
+                <td>${rendition.balance.toFixed(2)}</td>
+            `;
+    
+            // Agregar advertencia visual si el importe de cobranza excede el importe de venta
+            if (isPaymentExceedsSale) {
+                const warningCell = document.createElement("td");
+                warningCell.textContent = "¡Cobranza > Venta!";
+                warningCell.classList.add("warning");
+                row.appendChild(warningCell);
+            }
+    
+            renditionsTable.appendChild(row);
+        });
+    };
+    
+    // Función para actualizar la tabla de ventas totales
+    const updateSalesSummaryTable = (renditions) => {
+        salesSummaryTable.innerHTML = ""; // Limpia la tabla
+    
+        const salesSummary = {}; // Ventas totales por tipo de producto
+        const salesRemaining = {}; // Saldos pendientes por tipo de producto
+    
+        // Inicializa las ventas y los saldos pendientes
+        renditions.forEach((rendition) => {
+            if (!salesSummary[rendition.productType]) {
+                salesSummary[rendition.productType] = 0;
+                salesRemaining[rendition.productType] = 0;
+            }
+            salesSummary[rendition.productType] += rendition.saleAmount;
+            salesRemaining[rendition.productType] += rendition.saleAmount;
+        });
+    
+        // Restar el importe de cobranza del saldo pendiente
+        renditions.forEach((rendition) => {
+            if (salesRemaining[rendition.productType] !== undefined) {
+                salesRemaining[rendition.productType] -= rendition.paymentAmount;
+                if (salesRemaining[rendition.productType] < 0) {
+                    salesRemaining[rendition.productType] = 0; // Evita saldos negativos
+                }
+            }
+        });
+    
+        // Mostrar el resumen de ventas por producto
+        for (const [productType, totalSales] of Object.entries(salesSummary)) {
+            const summaryRow = document.createElement("tr");
+            const totalCobrado = totalSales - salesRemaining[productType]; // Total cobrado
+    
+            summaryRow.innerHTML = `
+                <td>${productType}</td>
+                <td>${totalCobrado.toFixed(2)}</td> <!-- Muestra lo cobrado hasta el momento -->
+            `;
+            salesSummaryTable.appendChild(summaryRow);
         }
         fetchRenditions();
     };
