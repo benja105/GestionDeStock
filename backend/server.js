@@ -156,33 +156,6 @@ app.post("/api/stock", authorize(), async (req, res) => {
     }
 });
 
-// Ruta para registrar ventas
-app.post("/api/sales", authorize(), async (req, res) => {
-    const { product, quantity } = req.body;
-    try {
-        const stockItem = await Stock.findOne({ product });
-
-        if (!stockItem || stockItem.quantity < quantity) {
-            return res.status(400).json({ message: "Stock insuficiente para realizar la venta" });
-        }
-
-        stockItem.quantity -= quantity;
-        await stockItem.save();
-
-        // Crear una venta con el userId del usuario autenticado
-        const sale = new Sale({
-            product,
-            quantity,
-            userId: req.user.id // Asignamos el userId desde el token del usuario autenticado
-        });
-        await sale.save();
-
-        res.json({ message: "Venta registrada con éxito", sale });
-    } catch (err) {
-        res.status(500).json({ message: "Error al registrar la venta" });
-    }
-});
-
 // Rutas de reportes
 app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
     const { type } = req.params;
@@ -366,18 +339,25 @@ app.get("/api/renditions", authorize(), async (req, res) => {
     }
 });
 
-// Ruta para registrar una nueva rendición (POST)
+// Ruta para registrar una rendición y registrarla como venta (POST)
 app.post("/api/renditions", authorize(), async (req, res) => {
-    const { 
-        productType, clientId, clientDetails, 
-        initialBoxes, rechargeBoxes, soldBoxes, 
-        returnBoxes, saleAmount, paymentAmount, 
-        paymentMethod
+    const {
+        productType,
+        clientId,
+        clientDetails,
+        initialBoxes,
+        rechargeBoxes,
+        soldBoxes,
+        returnBoxes,
+        saleAmount,
+        paymentAmount,
+        paymentMethod,
     } = req.body;
 
     const balance = saleAmount - paymentAmount;
 
     try {
+        // Crear la rendición
         const newRendition = new Rendition({
             userId: req.user.id,
             productType,
@@ -393,14 +373,28 @@ app.post("/api/renditions", authorize(), async (req, res) => {
             balance,
         });
         await newRendition.save();
-        res.status(201).json({ message: "Rendición registrada con éxito", rendition: newRendition });
+
+        // Registrar la venta asociada
+        const newSale = new Sale({
+            userId: req.user.id,
+            product: productType,
+            quantity: soldBoxes,
+            date: new Date(),
+        });
+        await newSale.save();
+
+        res.status(201).json({
+            message: "Rendición registrada con éxito y venta registrada.",
+            rendition: newRendition,
+            sale: newSale,
+        });
     } catch (err) {
-        res.status(500).json({ message: "Error al registrar la rendición" });
+        console.error("Error al registrar la rendición o la venta:", err);
+        res.status(500).json({ message: "Error al registrar la rendición y la venta." });
     }
 });
 
 // Botón de Cerrar Sesión
-
 app.post("/api/logout", authorize(), (req, res) => {
     try {
         // En este caso no necesitamos invalidar el token porque este expirará automáticamente
