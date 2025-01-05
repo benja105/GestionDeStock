@@ -191,57 +191,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Función para manejar el registro de ventas.
-     */
-    async function handleSale() {
-        const saleInput = document.getElementById("saleInput").value.trim();
-
-        if (!saleInput) {
-            alert("Por favor, ingresa un producto y cantidad. Ejemplo: 'producto, cantidad'");
-            return;
-        }
-
-        const [product, rawQuantity] = saleInput.split(",").map((item) => item.trim());
-        const quantity = parseInt(rawQuantity, 10);
-
-        if (!product || isNaN(quantity) || quantity <= 0) {
-            alert("Formato incorrecto. Usa el formato: 'producto, cantidad'");
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem("token"); // Recuperar el token
-            if (!token) throw new Error("No estás autenticado. Inicia sesión nuevamente.");
-
-            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/sales", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`, // Enviar el token
-                },
-                body: JSON.stringify({ product, quantity }),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) throw new Error(result.message || "Error al registrar la venta.");
-
-            alert(`Venta registrada: ${quantity} unidades de "${product}" vendidas.`);
-            document.getElementById("saleInput").value = ""; // Limpiar el input
-
-            updateStockView(); // Actualizar la vista del stock
-        } catch (error) {
-            console.error(error);
-            alert(error.message || "Error al registrar la venta.");
-        }
-    }
-
-    /**
-     * Asignar evento al botón de registrar venta.
-     */
-    document.getElementById("saleButton").addEventListener("click", handleSale);
-
-    /**
      * Manejo de reportes.
      */
     let isDownloading = false;  // Flag para evitar múltiples descargas
@@ -470,7 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
         try {
             // Verificar si el cliente ya existe
-            const checkResponse = await fetch(`https://gestiondestock-jv3a.onrender.com/api/renditions/check-client/${clientId}`, {
+            const checkResponse = await fetch(`http://localhost:3000/api/renditions/check-client/${clientId}`, {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
             });
@@ -508,7 +457,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
     
-            const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+            // Registrar rendición y venta en el backend
+            const response = await fetch("http://localhost:3000/api/renditions", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -522,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 calculateReturnBoxes();
                 fetchRenditions();
                 fetchPendingContrafacturas();
-                alert("Rendición registrada con éxito.");
+                alert("Rendición registrada con éxito y registrada como venta.");
             } else {
                 const errorResponse = await response.json();
                 alert("Error al registrar la rendición: " + (errorResponse.message || "Error desconocido"));
@@ -532,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(error.message);
         }
     });
-
+    
     // Cargar las rendiciones al cargar la página
     fetchRenditions();
 
