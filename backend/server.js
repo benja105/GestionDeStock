@@ -187,7 +187,10 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                 // Iterar sobre las ventas
                 sales.forEach(({ product, quantity, date, userId }) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
-                    const formattedDate = new Date(date).toLocaleString(); // Asegurarnos de que la fecha esté bien formateada
+    
+                    // Convertir la fecha al horario de Argentina (UTC-3)
+                    const formattedDate = new Date(date).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+    
                     doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
     
                     // Acumular las ventas por usuario
@@ -218,8 +221,8 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             console.error("Error al generar el reporte de ventas:", err);
             doc.text("Error al generar el reporte de ventas.");
         }
-    };    
-
+    };
+    
     const generateWeeklyReport = async (doc) => {
         try {
             const oneWeekAgo = new Date();
@@ -240,7 +243,9 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             } else {
                 weeklySales.forEach(({ product, quantity, date, userId }) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
-                    const formattedDate = new Date(date).toLocaleString(); // Asegurarnos de que la fecha esté bien formateada
+    
+                    // Convertir la fecha al horario de Argentina (UTC-3)
+                    const formattedDate = new Date(date).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
     
                     // Imprimir la venta individual
                     doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
