@@ -677,7 +677,7 @@ resetTablesButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch("http://localhost:3000/api/renditions", {
+        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
