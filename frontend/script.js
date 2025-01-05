@@ -668,8 +668,16 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
 const resetTablesButton = document.getElementById("resetTablesButton");
 
 resetTablesButton.addEventListener("click", async () => {
+    // Mostrar cuadro de confirmación
+    const userConfirmed = confirm("¿Está seguro de que desea reiniciar las tablas? Esto eliminará todos los datos asociados.");
+
+    if (!userConfirmed) {
+        alert("La acción de reiniciar las tablas fue cancelada."); // Mensaje si el usuario cancela
+        return; // Salir si no confirma
+    }
+
     try {
-        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+        const response = await fetch("http://localhost:3000/api/renditions", {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
