@@ -649,5 +649,3 @@ resetTablesButton.addEventListener("click", async () => {
         alert(error.message);
     }
 });
-
-// Modifica este codigo para que: al "registrar una rendicion", la misma se debe registrar como una venta y guardarse de la misma forma que se hace ahora en los reportes, de esta forma eliminar directamente la seccion para registrar ventas.
