@@ -620,33 +620,50 @@ const resetTablesButton = document.getElementById("resetTablesButton");
 
 resetTablesButton.addEventListener("click", async () => {
     // Mostrar cuadro de confirmación
-    const userConfirmed = confirm("¿Está seguro de que desea reiniciar las tablas? Esto eliminará todos los datos asociados.");
+    const userConfirmed = confirm("¿Está seguro de que desea reiniciar las tablas y transferir las ventas diarias? Esta acción es irreversible.");
 
     if (!userConfirmed) {
-        alert("La acción de reiniciar las tablas fue cancelada."); // Mensaje si el usuario cancela
-        return; // Salir si no confirma
+        alert("La acción de reiniciar las tablas fue cancelada.");
+        return; // Salir si el usuario cancela
     }
 
     try {
-        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+        // Paso 1: Transferir las ventas diarias al modelo `saleWeekly`
+        const transferResponse = await fetch("https://gestiondestock-jv3a.onrender.com/api/sales/transfer-to-weekly", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        if (!transferResponse.ok) {
+            const transferError = await transferResponse.json();
+            alert("Error al transferir las ventas diarias: " + (transferError.message || "Error desconocido"));
+            return;
+        }
+
+        // Paso 2: Reiniciar las rendiciones
+        const resetResponse = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("token")}`,
             },
         });
 
-        if (response.ok) {
-            // Limpiar las tablas en el frontend
-            renditionsTable.innerHTML = "";
-            salesSummaryTable.innerHTML = "";
-            fetchPendingContrafacturas();
-            alert("Las tablas y los datos asociados han sido reiniciados.");
-        } else {
-            const errorResponse = await response.json();
-            alert("Error al reiniciar las tablas: " + (errorResponse.message || "Error desconocido"));
+        if (!resetResponse.ok) {
+            const resetError = await resetResponse.json();
+            alert("Error al reiniciar las tablas: " + (resetError.message || "Error desconocido"));
+            return;
         }
+
+        // Limpiar las tablas en el frontend
+        renditionsTable.innerHTML = "";
+        salesSummaryTable.innerHTML = "";
+        fetchPendingContrafacturas();
+
+        alert("Las tablas y los datos asociados han sido reiniciados y las ventas diarias se han transferido correctamente.");
     } catch (error) {
-        console.error("Error al reiniciar las tablas:", error);
-        alert(error.message);
+        console.error("Error al reiniciar las tablas o transferir las ventas:", error);
+        alert("Se produjo un error inesperado. Por favor, inténtelo nuevamente.");
     }
 });
