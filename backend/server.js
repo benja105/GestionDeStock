@@ -398,7 +398,39 @@ app.post("/api/renditions", authorize(), async (req, res) => {
 
     const balance = saleAmount - paymentAmount;
 
+    // Validación lógica
+    const totalBoxes = initialBoxes + rechargeBoxes - returnBoxes;
+    if (soldBoxes > totalBoxes) {
+        return res.status(400).json({
+            message: "Las cajas vendidas no pueden exceder las cajas disponibles.",
+        });
+    }
+
+    if (balance < 0) {
+        return res.status(400).json({
+            message: "El saldo no puede ser negativo.",
+        });
+    }
+
     try {
+        // Verificar si el producto existe en el stock
+        const stockItem = await Stock.findOne({ product: productType });
+
+        if (!stockItem) {
+            return res.status(404).json({
+                message: `El producto ${productType} no existe en el stock.`,
+            });
+        }
+
+        // Validar que el stock disponible sea suficiente para cubrir la venta
+        if (stockItem.quantity < soldBoxes) {
+            return res.status(400).json({
+                message: `No hay suficiente stock del producto ${productType}. 
+                          Stock disponible: ${stockItem.quantity}, 
+                          solicitado: ${soldBoxes}.`,
+            });
+        }
+
         // Crear la rendición
         const newRendition = new Rendition({
             userId: req.user.id,
@@ -416,6 +448,10 @@ app.post("/api/renditions", authorize(), async (req, res) => {
         });
         await newRendition.save();
 
+        // Actualizar el stock en el backend
+        stockItem.quantity -= soldBoxes; // Reducir la cantidad vendida del stock
+        await stockItem.save(); // Guardar los cambios en el stock
+
         // Registrar la venta asociada
         const newSale = new Sale({
             userId: req.user.id,
@@ -426,13 +462,14 @@ app.post("/api/renditions", authorize(), async (req, res) => {
         await newSale.save();
 
         res.status(201).json({
-            message: "Rendición registrada con éxito y venta registrada.",
+            message: "Rendición registrada con éxito, venta registrada, y stock actualizado.",
             rendition: newRendition,
             sale: newSale,
+            stock: stockItem,
         });
     } catch (err) {
-        console.error("Error al registrar la rendición o la venta:", err);
-        res.status(500).json({ message: "Error al registrar la rendición y la venta." });
+        console.error("Error al registrar la rendición o actualizar el stock:", err);
+        res.status(500).json({ message: "Error al registrar la rendición y actualizar el stock." });
     }
 });
 
