@@ -32,16 +32,27 @@ mongoose.connection.once("open", () => {
 });
 
 // Esquemas y modelos
-const stockSchema = new mongoose.Schema({ product: String, quantity: Number });
+const stockSchema = new mongoose.Schema({ 
+    product: String, 
+    quantity: Number 
+});
 const Stock = mongoose.model("Stock", stockSchema);
 
 const saleSchema = new mongoose.Schema({
     product: String,
     quantity: Number,
     date: { type: Date, default: Date.now },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // Campo que hace referencia al usuario
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Campo que hace referencia al usuario
 });
 const Sale = mongoose.model("Sale", saleSchema);
+
+const saleWeeklySchema = new mongoose.Schema({
+    product: String,
+    quantity: Number,
+    date: { type: Date, default: Date.now },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Campo que hace referencia al usuario
+});
+const SaleWeekly = mongoose.model("SaleWeekly", saleWeeklySchema);
 
 const userSchema = new mongoose.Schema({
     username: String,
@@ -196,7 +207,7 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             console.error("Error al generar el reporte de stock:", error);
             doc.text("Error al generar el reporte de stock.");
         }
-    };
+    };    
 
     const generateSalesReport = async (doc) => {
         try {
@@ -261,8 +272,8 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     
-            // Obtener las ventas de la última semana y poblar el campo 'userId' para obtener la información del usuario
-            const weeklySales = await Sale.find({ date: { $gte: oneWeekAgo } }).populate("userId", "username");
+            // Obtener todas las ventas semanales de la tabla "SaleWeekly"
+            const weeklySales = await SaleWeekly.find().populate("userId", "username"); // Cambiado a "SaleWeekly"
     
             // Inicializar un objeto para acumular las ventas por usuario
             const userSalesSummary = {};
@@ -316,7 +327,7 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             doc.text("Error al generar el reporte semanal.");
         }
     };
-
+    
     try {
         const doc = new PDFDocument();
         const filename = `${type}-report-${Date.now()}.pdf`;
@@ -601,6 +612,35 @@ app.get("/api/renditions/check-client/:clientId", authorize(), async (req, res) 
     } catch (err) {
         console.error("Error al verificar los detalles del cliente:", err);
         res.status(500).json({ message: "Error al verificar los detalles del cliente" });
+    }
+});
+
+app.post("/api/sales/transfer-to-weekly", authorize(), async (req, res) => {
+    try {
+        // Obtener todas las ventas diarias
+        const dailySales = await Sale.find();
+
+        if (dailySales.length === 0) {
+            return res.status(200).json({ message: "No hay ventas diarias para transferir." });
+        }
+
+        // Transferir las ventas al modelo de ventas semanales
+        const weeklySales = dailySales.map((sale) => ({
+            userId: sale.userId,
+            product: sale.product,
+            quantity: sale.quantity,
+            date: sale.date,
+        }));
+
+        await SaleWeekly.insertMany(weeklySales);
+
+        // Eliminar las ventas diarias
+        await Sale.deleteMany();
+
+        res.status(200).json({ message: "Ventas diarias transferidas a ventas semanales con éxito." });
+    } catch (error) {
+        console.error("Error al transferir las ventas diarias a semanales:", error);
+        res.status(500).json({ message: "Error al transferir las ventas diarias a semanales." });
     }
 });
 
