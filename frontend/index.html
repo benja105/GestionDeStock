@@ -54,6 +54,15 @@
       <p>¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a></p>
     </div>
 
+    <!-- Reportes (en el caso de ingresar como admin) -->
+    <div id="reports" style="display: none;">
+      <h2>Reportes</h2>
+      <button class="report-button" data-type="weekly">Reporte Semanal</button>
+      <button class="report-button" data-type="stock">Reporte de Stock</button>
+      <button class="report-button" data-type="sales">Reporte de Ventas</button>
+      <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
+    </div>
+
     <!-- Acciones, Estado del Stock y Registrar Venta -->
     <div id="dashboard" style="display: none;">
       <section>
@@ -80,15 +89,6 @@
           </section>
         </section>
 
-      <!-- Reportes (en el caso de ingresar como admin) -->
-      <div id="reports" style="display: none;">
-        <h2>Reportes</h2>
-        <button class="report-button" data-type="weekly">Reporte Semanal</button>
-        <button class="report-button" data-type="stock">Reporte de Stock</button>
-        <button class="report-button" data-type="sales">Reporte de Ventas</button>
-        <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
-      </div>
-
       <!-- Gestión de Rendición de Dinero -->
         <h2>Gestión de Rendición de Dinero</h2>
 
@@ -101,6 +101,7 @@
                 <option value="Producto A">Producto A</option>
                 <option value="Producto B">Producto B</option>
                 <option value="Producto C">Producto C</option>
+                <option value="Producto C">Producto D</option>
             </select>
 
             <label for="clientId">ID Cliente:</label>
