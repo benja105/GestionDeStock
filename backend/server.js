@@ -424,6 +424,15 @@ app.post("/api/renditions", authorize(), async (req, res) => {
     }
 
     try {
+
+        // Validar si los detalles del cliente están asociados a otro ID
+        const existingRendition = await Rendition.findOne({ clientDetails });
+        if (existingRendition && existingRendition.clientId !== clientId) {
+            return res.status(400).json({
+                message: "Los detalles del cliente ya están asociados a otro ID. No se puede registrar esta rendición.",
+            });
+        }
+        
         // Verificar si el producto existe en el stock
         const stockItem = await Stock.findOne({ product: productType });
 
