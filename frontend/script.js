@@ -438,6 +438,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Validar que los detalles del cliente no estén asociados a un ID diferente
+            if (clientData && clientData.clientId && clientData.clientId !== clientId) {
+                alert("Los detalles del cliente ya están asociados a otro ID. No se puede registrar esta rendición.");
+                return;
+            }
+
             const formData = {
                 productType: document.getElementById("productType").value,
                 clientId,
