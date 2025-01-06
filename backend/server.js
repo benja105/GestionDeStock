@@ -189,7 +189,11 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
     
                     // Convertir la fecha al horario de Argentina (UTC-3)
-                    const formattedDate = new Date(date).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+                    const formattedDate = new Date(date).toLocaleString("es-AR", { 
+                        timeZone: "America/Argentina/Buenos_Aires", 
+                        hour12: true, 
+                        weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" 
+                    });
     
                     doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
     
@@ -245,7 +249,11 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
     
                     // Convertir la fecha al horario de Argentina (UTC-3)
-                    const formattedDate = new Date(date).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" });
+                    const formattedDate = new Date(date).toLocaleString("es-AR", { 
+                        timeZone: "America/Argentina/Buenos_Aires", 
+                        hour12: true, 
+                        weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" 
+                    });
     
                     // Imprimir la venta individual
                     doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
