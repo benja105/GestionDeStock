@@ -472,7 +472,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 calculateReturnBoxes();
                 fetchRenditions();
                 fetchPendingContrafacturas();
-                alert("Rendición registrada con éxito y registrada como venta.");
+                updateStockView();
+                alert("Rendición registrada con éxito, venta registrada, y stock actualizado.");
             } else {
                 const errorResponse = await response.json();
                 alert("Error al registrar la rendición: " + (errorResponse.message || "Error desconocido"));
@@ -638,7 +639,7 @@ resetTablesButton.addEventListener("click", async () => {
             // Limpiar las tablas en el frontend
             renditionsTable.innerHTML = "";
             salesSummaryTable.innerHTML = "";
-
+            fetchPendingContrafacturas();
             alert("Las tablas y los datos asociados han sido reiniciados.");
         } else {
             const errorResponse = await response.json();
