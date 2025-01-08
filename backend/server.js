@@ -213,6 +213,15 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
         try {
             // Obtener las ventas y poblar el campo 'userId' para obtener la información del usuario
             const sales = await Sale.find().populate("userId", "username"); // 'username' es el campo que queremos del modelo User
+            const renditions = await Rendition.find(); // Obtener las rendiciones para calcular precios unitarios
+    
+            // Crear un mapa de precios basado en las rendiciones
+            const productPrices = {};
+            renditions.forEach(({ productType, saleAmount, soldBoxes }) => {
+                if (soldBoxes > 0) {
+                    productPrices[productType] = saleAmount / soldBoxes; // Calcular precio unitario
+                }
+            });
     
             doc.text("Reporte de Ventas", { align: "center", underline: true });
             doc.moveDown();
@@ -223,30 +232,47 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             } else {
                 // Inicializar un objeto para acumular las ventas por usuario
                 const userSalesSummary = {};
+                const totalSalesSummary = {}; // Para almacenar las ventas totales por producto
     
                 // Iterar sobre las ventas
                 sales.forEach(({ product, quantity, date, userId }) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
+                    const productPrice = productPrices[product] || 0; // Obtener precio del producto desde las rendiciones
+                    const totalValue = quantity * productPrice; // Calcular valor total de la venta
     
                     // Convertir la fecha al horario de Argentina (UTC-3)
-                    const formattedDate = new Date(date).toLocaleString("es-AR", { 
-                        timeZone: "America/Argentina/Buenos_Aires", 
-                        hour12: true, 
-                        weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" 
+                    const formattedDate = new Date(date).toLocaleString("es-AR", {
+                        timeZone: "America/Argentina/Buenos_Aires",
+                        hour12: true,
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
                     });
     
-                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
+                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}. Total: $${totalValue.toFixed(2)}`);
     
                     // Acumular las ventas por usuario
                     if (!userSalesSummary[userName]) {
-                        userSalesSummary[userName] = { totalSold: 0, products: {} };
+                        userSalesSummary[userName] = { totalSold: 0, totalValue: 0, products: {} };
                     }
     
                     userSalesSummary[userName].totalSold += quantity;
+                    userSalesSummary[userName].totalValue += totalValue;
                     if (!userSalesSummary[userName].products[product]) {
-                        userSalesSummary[userName].products[product] = 0;
+                        userSalesSummary[userName].products[product] = { quantity: 0, value: 0 };
                     }
-                    userSalesSummary[userName].products[product] += quantity;
+                    userSalesSummary[userName].products[product].quantity += quantity;
+                    userSalesSummary[userName].products[product].value += totalValue;
+    
+                    // Acumular las ventas totales por producto
+                    if (!totalSalesSummary[product]) {
+                        totalSalesSummary[product] = { quantity: 0, value: 0 };
+                    }
+                    totalSalesSummary[product].quantity += quantity;
+                    totalSalesSummary[product].value += totalValue;
                 });
     
                 doc.moveDown();
@@ -254,11 +280,20 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                 doc.moveDown();
     
                 // Agregar el resumen de ventas por usuario al final
-                Object.entries(userSalesSummary).forEach(([userName, { totalSold, products }]) => {
+                Object.entries(userSalesSummary).forEach(([userName, { totalSold, totalValue, products }]) => {
                     const productSummary = Object.entries(products)
-                        .map(([product, quantity]) => `${quantity} ${product}`)
+                        .map(([product, { quantity, value }]) => `${quantity} ${product} ($${value.toFixed(2)})`)
                         .join(", ");
-                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary})`);
+                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary}). Total: $${totalValue.toFixed(2)}`);
+                });
+    
+                doc.moveDown();
+                doc.text("Resumen de Ventas Totales por Producto:", { underline: true });
+                doc.moveDown();
+    
+                // Agregar el resumen de ventas totales al final
+                Object.entries(totalSalesSummary).forEach(([product, { quantity, value }]) => {
+                    doc.text(`${product}: ${quantity} unidades vendidas. Total: $${value.toFixed(2)}`);
                 });
             }
         } catch (err) {
@@ -269,14 +304,17 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
     
     const generateWeeklyReport = async (doc) => {
         try {
-            const oneWeekAgo = new Date();
-            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
             // Obtener todas las ventas semanales de la tabla "SaleWeekly"
-            const weeklySales = await SaleWeekly.find().populate("userId", "username"); // Cambiado a "SaleWeekly"
+            const weeklySales = await SaleWeekly.find().populate("userId", "username");
+            const renditions = await Rendition.find(); // Obtener las rendiciones para calcular precios unitarios
     
-            // Inicializar un objeto para acumular las ventas por usuario
-            const userSalesSummary = {};
+            // Crear un mapa de precios basado en las rendiciones
+            const productPrices = {};
+            renditions.forEach(({ productType, saleAmount, soldBoxes }) => {
+                if (soldBoxes > 0) {
+                    productPrices[productType] = saleAmount / soldBoxes; // Calcular precio unitario
+                }
+            });
     
             doc.text("Reporte Semanal", { align: "center", underline: true });
             doc.moveDown();
@@ -285,29 +323,48 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             if (weeklySales.length === 0) {
                 doc.text("No hay ventas registradas en la última semana.");
             } else {
+                const userSalesSummary = {}; // Acumular ventas por usuario
+                const totalSalesSummary = {}; // Para almacenar las ventas totales por producto
+    
                 weeklySales.forEach(({ product, quantity, date, userId }) => {
                     const userName = userId ? userId.username : "Usuario desconocido"; // Nombre del usuario
+                    const productPrice = productPrices[product] || 0; // Obtener precio del producto desde las rendiciones
+                    const totalValue = quantity * productPrice; // Calcular valor total de la venta
     
                     // Convertir la fecha al horario de Argentina (UTC-3)
-                    const formattedDate = new Date(date).toLocaleString("es-AR", { 
-                        timeZone: "America/Argentina/Buenos_Aires", 
-                        hour12: true, 
-                        weekday: "long", year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "numeric" 
+                    const formattedDate = new Date(date).toLocaleString("es-AR", {
+                        timeZone: "America/Argentina/Buenos_Aires",
+                        hour12: true,
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
                     });
     
                     // Imprimir la venta individual
-                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}`);
+                    doc.text(`${quantity} ${product}, vendidas el ${formattedDate} por ${userName}. Total: $${totalValue.toFixed(2)}`);
     
                     // Acumular las ventas por usuario
                     if (!userSalesSummary[userName]) {
-                        userSalesSummary[userName] = { totalSold: 0, products: {} };
+                        userSalesSummary[userName] = { totalSold: 0, totalValue: 0, products: {} };
                     }
     
                     userSalesSummary[userName].totalSold += quantity;
+                    userSalesSummary[userName].totalValue += totalValue;
                     if (!userSalesSummary[userName].products[product]) {
-                        userSalesSummary[userName].products[product] = 0;
+                        userSalesSummary[userName].products[product] = { quantity: 0, value: 0 };
                     }
-                    userSalesSummary[userName].products[product] += quantity;
+                    userSalesSummary[userName].products[product].quantity += quantity;
+                    userSalesSummary[userName].products[product].value += totalValue;
+    
+                    // Acumular las ventas totales por producto
+                    if (!totalSalesSummary[product]) {
+                        totalSalesSummary[product] = { quantity: 0, value: 0 };
+                    }
+                    totalSalesSummary[product].quantity += quantity;
+                    totalSalesSummary[product].value += totalValue;
                 });
     
                 doc.moveDown();
@@ -315,11 +372,20 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                 doc.moveDown();
     
                 // Agregar el resumen de ventas por usuario al final
-                Object.entries(userSalesSummary).forEach(([userName, { totalSold, products }]) => {
+                Object.entries(userSalesSummary).forEach(([userName, { totalSold, totalValue, products }]) => {
                     const productSummary = Object.entries(products)
-                        .map(([product, quantity]) => `${quantity} ${product}`)
+                        .map(([product, { quantity, value }]) => `${quantity} ${product} ($${value.toFixed(2)})`)
                         .join(", ");
-                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary})`);
+                    doc.text(`"${userName}": ${totalSold} productos vendidos (${productSummary}). Total: $${totalValue.toFixed(2)}`);
+                });
+    
+                doc.moveDown();
+                doc.text("Resumen de Ventas Totales por Producto:", { underline: true });
+                doc.moveDown();
+    
+                // Agregar el resumen de ventas totales al final
+                Object.entries(totalSalesSummary).forEach(([product, { quantity, value }]) => {
+                    doc.text(`${product}: ${quantity} unidades vendidas. Total: $${value.toFixed(2)}`);
                 });
             }
         } catch (err) {
@@ -327,6 +393,7 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
             doc.text("Error al generar el reporte semanal.");
         }
     };
+    
     
     try {
         const doc = new PDFDocument();
@@ -385,7 +452,7 @@ const Rendition = mongoose.model("Rendition", renditionSchema);
 // Ruta para obtener todas las rendiciones asociadas al usuario autenticado (GET)
 app.get("/api/renditions", authorize(), async (req, res) => {
     try {
-        const renditions = await Rendition.find({ userId: req.user.id }); // Filtrar por el usuario autenticado
+        const renditions = await Rendition.find({ userId: req.user.id }).populate("userId", "username"); // Filtrar por el usuario autenticado
         res.status(200).json(renditions);
     } catch (err) {
         res.status(500).json({ message: "Error al obtener las rendiciones" });
@@ -424,7 +491,7 @@ app.post("/api/renditions", authorize(), async (req, res) => {
     }
 
     try {
-
+        
         // Validar si los detalles del cliente están asociados a otro ID
         const existingRendition = await Rendition.findOne({ clientDetails });
         if (existingRendition && existingRendition.clientId !== clientId) {
@@ -432,7 +499,7 @@ app.post("/api/renditions", authorize(), async (req, res) => {
                 message: "Los detalles del cliente ya están asociados a otro ID. No se puede registrar esta rendición.",
             });
         }
-        
+
         // Verificar si el producto existe en el stock
         const stockItem = await Stock.findOne({ product: productType });
 
@@ -653,6 +720,19 @@ app.post("/api/sales/transfer-to-weekly", authorize(), async (req, res) => {
     }
 });
 
+// Ruta para obtener las rendiciones de todos los usuarios (solo para supervisores y administradores)
+app.get("/api/renditions/all", authorize(["admin"]), async (req, res) => {
+    try {
+
+        // Obtener todas las rendiciones
+        const renditions = await Rendition.find().populate("userId", "username");
+
+        res.status(200).json(renditions);
+    } catch (err) {
+        console.error("Error al obtener todas las rendiciones:", err); // Registra el error en el servidor
+        res.status(500).json({ message: "Error al obtener todas las rendiciones." });
+    }
+});
 
 //hasta aca
 
