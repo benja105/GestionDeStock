@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Elementos comunes
+
     const authForm = document.getElementById("authForm");
     const authError = document.getElementById("authError");
     const authSection = document.getElementById("auth");
@@ -18,10 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let selectedAction = "add"; // Acción seleccionada por defecto
     let userRole = null; // Rol del usuario autenticado
-
-    /**
-     * Alternar entre las vistas de inicio de sesión y registro.
-     */
+    
+    // Alternar entre las vistas de inicio de sesión y registro.
     function toggleAuthViews() {
         authSection.style.display = authSection.style.display === "none" ? "block" : "none";
         registerSection.style.display = registerSection.style.display === "none" ? "block" : "none";
@@ -29,9 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     document.getElementById("showLogin").addEventListener("click", toggleAuthViews);
 
-    /**
-     * Redirigir al formulario de registro desde el panel de administrador.
-     */
+    // Redirigir al formulario de registro desde el panel de administrador.
     document.getElementById("registerNewUserButton").addEventListener("click", () => {
         dashboard.style.display = "none";
         registerSection.style.display = "block";
@@ -39,9 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         registerError.textContent = ""; // Limpiar errores previos
     });
 
-    /**
-    * Registro de un nuevo usuario.
-    */
+    // Registro de un nuevo usuario.
     async function registerUser(event) {
         event.preventDefault();
         const username = document.getElementById("registerUsername").value;
@@ -74,9 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /**
-     * Autenticación del usuario.
-     */
+    // Autenticación del usuario.
     async function authenticateUser(event) {
         event.preventDefault();
         const username = document.getElementById("username").value;
@@ -110,9 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /**
-     * Actualiza la vista del stock desde el servidor.
-     */
+    // Actualiza la vista del stock desde el servidor.
     async function updateStockView() {
         try {
             const token = localStorage.getItem("token"); // Obtener token del localStorage
@@ -142,9 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /**
-     * Manejo de acciones (Agregar, Solicitar, Devolver).
-     */
+    // Manejo de acciones (Agregar, Solicitar, Devolver).
     async function handleAction() {
         const input = actionInput.value.trim();
 
@@ -190,9 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    /**
-     * Manejo de reportes.
-     */
+    // Manejo de reportes.
     let isDownloading = false;  // Flag para evitar múltiples descargas
 
     async function handleReport(type) {
@@ -268,15 +254,12 @@ document.addEventListener("DOMContentLoaded", () => {
         button.addEventListener("click", () => handleReport(button.dataset.type));
     });
 
-    /**
-     * Actualiza el título de acciones con la opción seleccionada.
-     */
+    // Actualiza el título de acciones con la opción seleccionada.
     function updateActionsTitle(action) {
         const actionTexts = {
             add: "Agregar al stock",
             request: "Solicitar del stock",
             return: "Devolver al stock",
-            sale: "Registrar venta",
         };
 
         const actionText = actionTexts[action] || "Acción desconocida";
@@ -288,8 +271,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateActionsTitle(selectedAction); // Título inicial
 
-    //ultimo
-
+    // Rendiciones
     const renditionForm = document.getElementById("renditionForm");
     const renditionsTable = document.getElementById("renditionsTable");
     const salesSummaryTable = document.getElementById("salesSummaryTable");
@@ -622,6 +604,7 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
     }
 });
 
+// Reiniciar tablas diarias y enviarlas a las semanales
 const resetTablesButton = document.getElementById("resetTablesButton");
 
 resetTablesButton.addEventListener("click", async () => {
@@ -671,5 +654,122 @@ resetTablesButton.addEventListener("click", async () => {
     } catch (error) {
         console.error("Error al reiniciar las tablas o transferir las ventas:", error);
         alert("Se produjo un error inesperado. Por favor, inténtelo nuevamente.");
+    }
+});
+
+const clearTablesButton = document.getElementById("clearTablesButton");
+
+clearTablesButton.addEventListener("click", async () => {
+    // Mostrar cuadro de confirmación
+    const userConfirmed = confirm("¿Está seguro de que desea reiniciar las tablas? Esta acción es irreversible.");
+
+    if (!userConfirmed) {
+        alert("La acción de limpiar las tablas fue cancelada.");
+        return; // Salir si el usuario cancela
+    }
+
+    try {
+
+        // Reiniciar las rendiciones
+        const resetResponse = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions", {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        if (!resetResponse.ok) {
+            const resetError = await resetResponse.json();
+            alert("Error al reiniciar las tablas: " + (resetError.message || "Error desconocido"));
+            return;
+        }
+
+        // Limpiar las tablas en el frontend
+        renditionsTable.innerHTML = "";
+        salesSummaryTable.innerHTML = "";
+        fetchPendingContrafacturas();
+
+        alert("Las tablas y los datos asociados han sido reiniciados correctamente.");
+    } catch (error) {
+        console.error("Error al reiniciar las tablas", error);
+        alert("Se produjo un error inesperado. Por favor, inténtelo nuevamente.");
+    }
+});
+
+function exportToCSV(data, filename) {
+    // Definir encabezados personalizados
+    const headers = [
+        "ID Rendición",
+        "Usuario",
+        "Tipo de Producto",
+        "ID Cliente",
+        "Detalles del Cliente",
+        "Cajas Iniciales",
+        "Cajas Recargadas",
+        "Cajas Vendidas",
+        "Cajas Devueltas",
+        "Importe Venta",
+        "Importe Cobranza",
+        "Método de Pago",
+        "Saldo Pendiente",
+    ];
+
+    // Transformar los datos para que sean más claros
+    const rows = data.map((row) => ({
+        "ID Rendición": row._id,
+        "Usuario": row.userId?.username || "Usuario desconocido", // Si estás populando userId
+        "Tipo de Producto": row.productType,
+        "ID Cliente": row.clientId,
+        "Detalles del Cliente": row.clientDetails,
+        "Cajas Iniciales": row.initialBoxes,
+        "Cajas Recargadas": row.rechargeBoxes,
+        "Cajas Vendidas": row.soldBoxes,
+        "Cajas Devueltas": row.returnBoxes,
+        "Importe Venta": `$${row.saleAmount.toFixed(2)}`, // Formato moneda
+        "Importe Cobranza": `$${row.paymentAmount.toFixed(2)}`,
+        "Método de Pago": row.paymentMethod,
+        "Saldo Pendiente": `$${row.balance.toFixed(2)}`,
+    }));
+
+    // Convertir los encabezados y filas en formato CSV
+    const csvContent = [
+        headers.join(","), // Encabezados
+        ...rows.map((row) => Object.values(row).join(",")), // Filas de datos
+    ].join("\n");
+
+    // Crear y descargar el archivo CSV
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Escuchar el evento del botón para exportar CSV
+document.getElementById("exportCSVButton").addEventListener("click", async () => {
+    try {
+        const token = localStorage.getItem("token"); // Obtener el token de autenticación
+        if (!token) throw new Error("No estás autenticado.");
+
+        // Cambiar el endpoint para obtener las rendiciones de todos los usuarios
+        const response = await fetch("https://gestiondestock-jv3a.onrender.com/api/renditions/all", {
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error("Error al obtener los datos.");
+        const renditions = await response.json();
+
+        if (renditions.length === 0) {
+            alert("No hay datos para exportar.");
+            return;
+        }
+
+        exportToCSV(renditions, "rendiciones_todos_usuarios");
+        alert("Datos exportados a CSV con éxito.");
+    } catch (error) {
+        console.error("Error al exportar a CSV:", error);
+        alert("Error al exportar los datos.");
     }
 });
