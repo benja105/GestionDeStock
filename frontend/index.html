@@ -13,6 +13,9 @@
     <!-- Botón para cerrar sesión y actualizar -->
     <div>
       <button id="logoutButton">Cerrar Sesión</button>
+      <a href="#renditionFormV"><button >Registrar Rendiciones</button></a>
+      <a href="#renditionsTableV"><button >Ver Rendiciones</button></a>
+      <a href="#paymentFormV"><button >Pagar Contrafactura</button></a>
     </div>
   </header>
 
@@ -56,10 +59,11 @@
 
     <!-- Reportes (en el caso de ingresar como admin) -->
     <div id="reports" style="display: none;">
-      <h2>Reportes</h2>
+      <h2>Reportes y Registro de Nuevo Usuario</h2>
       <button class="report-button" data-type="weekly">Reporte Semanal</button>
       <button class="report-button" data-type="stock">Reporte de Stock</button>
       <button class="report-button" data-type="sales">Reporte de Ventas</button>
+      <button id="exportCSVButton">Reporte de Rendiciones de todos los Usuarios</button>
       <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
     </div>
 
@@ -68,11 +72,10 @@
       <section>
         <section id="actions">
           <h2 id="actionsTitle">Acciones</h2>
+
           <!-- Sección de acciones -->
           <div id="actionButtons">
             <button class="action-button" data-action="add">Agregar al stock</button>
-            <button class="action-button" data-action="request">Solicitar del stock</button>
-            <button class="action-button" data-action="return">Devolver al stock</button>
           </div>
 
           <label for="actionInput">Producto y cantidad:</label>
@@ -90,7 +93,7 @@
         </section>
 
       <!-- Gestión de Rendición de Dinero -->
-        <h2>Gestión de Rendición de Dinero</h2>
+        <h2 id="renditionFormV">Gestión de Rendición de Dinero</h2>
 
         <!-- Formulario para registrar rendiciones -->
         <section>
@@ -134,7 +137,7 @@
                 <option value="Transferencia">Transferencia</option>
             </select>
 
-            <button type="submit">Registrar Rendición</button>
+            <button type="submit" id="paymentFormV">Registrar Rendición</button>
           </form>
         </section>
 
@@ -150,7 +153,7 @@
             <label for="paymentAmount">Monto a Pagar:</label>
             <input type="number" id="paymentAmountInput" name="paymentAmount" required min="1" step="0.01">
 
-            <button type="submit">Registrar Pago</button>
+            <button type="submit" id="renditionsTableV">Registrar Pago</button>
           </form>
         </section>
 
@@ -194,7 +197,8 @@
             </tbody>
           </table>
           <!-- Botón para reiniciar las tablas -->
-          <button id="resetTablesButton" style="margin-top: 10px;">Reiniciar Tabla Diaria</button>
+          <button id="resetTablesButton" style="margin-top: 10px;">Reiniciar las tablas y Transferir las ventas diarias</button>
+          <button id="clearTablesButton" style="margin-top: 10px;">Limpiar Tablas Diarias</button>
         </section>
     </div>
   </main>
