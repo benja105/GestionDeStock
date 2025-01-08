@@ -295,6 +295,26 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                 Object.entries(totalSalesSummary).forEach(([product, { quantity, value }]) => {
                     doc.text(`${product}: ${quantity} unidades vendidas. Total: $${value.toFixed(2)}`);
                 });
+
+                doc.moveDown();
+
+                // Obtener la fecha y hora actual en horario de Argentina
+                const currentDateTime = new Date().toLocaleString("es-AR", {
+                    timeZone: "America/Argentina/Buenos_Aires",
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                });
+        
+                // Mensaje al final del reporte
+                doc.text(`Reporte de Ventas generado el ${currentDateTime}`, {
+                    align: "center",
+                    italics: true,
+                });
             }
         } catch (err) {
             console.error("Error al generar el reporte de ventas:", err);
@@ -387,13 +407,32 @@ app.get("/api/reports/:type", authorize(["admin"]), async (req, res) => {
                 Object.entries(totalSalesSummary).forEach(([product, { quantity, value }]) => {
                     doc.text(`${product}: ${quantity} unidades vendidas. Total: $${value.toFixed(2)}`);
                 });
+
+                doc.moveDown();
+                
+                // Obtener la fecha y hora actual en horario de Argentina
+                const currentDateTime = new Date().toLocaleString("es-AR", {
+                    timeZone: "America/Argentina/Buenos_Aires",
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                });
+        
+                // Mensaje al final del reporte
+                doc.text(`Reporte Semanal generado el ${currentDateTime}`, {
+                    align: "center",
+                    italics: true,
+                });
             }
         } catch (err) {
             console.error("Error al generar el reporte semanal:", err);
             doc.text("Error al generar el reporte semanal.");
         }
     };
-    
     
     try {
         const doc = new PDFDocument();
