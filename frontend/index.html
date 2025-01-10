@@ -20,6 +20,7 @@
   </header>
 
   <main>
+
     <!-- Contenedor de autenticación y registro -->
     <div id="auth">
       <h2 id="authTitle">Inicia Sesión</h2>
@@ -57,18 +58,19 @@
       <p>¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a></p>
     </div>
 
-    <!-- Reportes (en el caso de ingresar como admin) -->
-    <div id="reports" style="display: none;">
-      <h2>Reportes y Registro de Nuevo Usuario</h2>
-      <button class="report-button" data-type="weekly">Reporte Semanal</button>
-      <button class="report-button" data-type="stock">Reporte de Stock</button>
-      <button class="report-button" data-type="sales">Reporte de Ventas</button>
-      <button id="exportCSVButton">Reporte de Rendiciones de todos los Usuarios</button>
-      <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
-    </div>
-
     <!-- Acciones, Estado del Stock y Registrar Venta -->
     <div id="dashboard" style="display: none;">
+      
+      <!-- Reportes (en el caso de ingresar como admin) -->
+      <div id="reports" style="display: none;">
+        <h2>Reportes y Registro de Nuevo Usuario</h2>
+        <button class="report-button" data-type="weekly">Reporte Semanal</button>
+        <button class="report-button" data-type="stock">Reporte de Stock</button>
+        <button class="report-button" data-type="sales">Reporte de Ventas</button>
+        <button id="exportCSVButton">Reporte de Rendiciones de todos los Usuarios</button>
+        <button id="registerNewUserButton">Registrar Nuevo Usuario</button>
+      </div>
+
       <section>
         <section id="actions">
           <h2 id="actionsTitle">Acciones</h2>
